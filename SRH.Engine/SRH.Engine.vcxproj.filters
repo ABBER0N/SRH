@@ -51,6 +51,9 @@
     <ClInclude Include="Input\InputStateStore.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="Input\InputEventBus.h">
+      <Filter>Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -63,6 +66,9 @@
       <Filter>Public</Filter>
     </ClCompile>
     <ClCompile Include="Input\InputStateStore.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputEventBus.cpp">
       <Filter>Input</Filter>
     </ClCompile>
   </ItemGroup>

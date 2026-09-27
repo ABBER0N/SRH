@@ -1,7 +1,11 @@
 #include "pch.h"
+
 #include "Public/SrhEngine.h"
+
 #include "Devices/DeviceRegistry.h"
+#include "Input/InputEventBus.h"
 #include "Input/InputStateStore.h"
+
 #include <utility>
 
 namespace srh::engine
@@ -9,8 +13,14 @@ namespace srh::engine
     class SrhEngine::Impl
     {
     public:
-        DeviceRegistry deviceRegistry;
-        InputStateStore inputStateStore;
+        DeviceRegistry
+            deviceRegistry;
+
+        InputStateStore
+            inputStateStore;
+
+        InputEventBus
+            inputEventBus;
     };
 
     SrhEngine::SrhEngine()
@@ -108,11 +118,21 @@ namespace srh::engine
         const InputEvent& event
     )
     {
-        return
-            m_impl->inputStateStore
-            .Apply(
+        const bool applied =
+            m_impl->inputStateStore.Apply(
                 event
             );
+
+        if (!applied)
+        {
+            return false;
+        }
+
+        m_impl->inputEventBus.Publish(
+            event
+        );
+
+        return true;
     }
 
     std::optional<InputControlState>
@@ -140,5 +160,29 @@ namespace srh::engine
     void SrhEngine::ClearInputState()
     {
         m_impl->inputStateStore.Clear();
+    }
+
+    //
+    // Input events
+    //
+
+    SrhEngine::InputSubscriptionId
+        SrhEngine::SubscribeInput(
+            InputCallback callback
+        )
+    {
+        return
+            m_impl->inputEventBus.Subscribe(
+                std::move(callback)
+            );
+    }
+
+    void SrhEngine::UnsubscribeInput(
+        const InputSubscriptionId subscriptionId
+    )
+    {
+        m_impl->inputEventBus.Unsubscribe(
+            subscriptionId
+        );
     }
 }

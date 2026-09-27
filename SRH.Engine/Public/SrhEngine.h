@@ -3,6 +3,9 @@
 #include "Domain/DeviceState.h"
 #include "Domain/InputEvent.h"
 #include "Domain/InputTypes.h"
+
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -11,6 +14,14 @@ namespace srh::engine
     class SrhEngine
     {
     public:
+        using InputSubscriptionId =
+            std::uint64_t;
+
+        using InputCallback =
+            std::function<
+            void(const InputEvent&)
+            >;
+
         SrhEngine();
         ~SrhEngine();
 
@@ -80,9 +91,23 @@ namespace srh::engine
 
         void ClearInputState();
 
+        //
+        // Input events
+        //
+
+        [[nodiscard]]
+        InputSubscriptionId SubscribeInput(
+            InputCallback callback
+        );
+
+        void UnsubscribeInput(
+            InputSubscriptionId subscriptionId
+        );
+
     private:
         class Impl;
 
-        std::unique_ptr<Impl> m_impl;
+        std::unique_ptr<Impl>
+            m_impl;
     };
 }
