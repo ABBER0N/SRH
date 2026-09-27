@@ -161,6 +161,7 @@
     <ClInclude Include="Domain\DeviceState.h" />
     <ClInclude Include="Domain\InputEvent.h" />
     <ClInclude Include="Domain\InputTypes.h" />
+    <ClInclude Include="Execution\ActionExecutor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Input\InputEventBus.h" />
     <ClInclude Include="Input\InputStateStore.h" />
@@ -171,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Devices\DeviceRegistry.cpp" />
+    <ClCompile Include="Execution\ActionExecutor.cpp" />
     <ClCompile Include="Input\InputEventBus.cpp" />
     <ClCompile Include="Input\InputStateStore.cpp" />
     <ClCompile Include="Mapping\MappingService.cpp" />

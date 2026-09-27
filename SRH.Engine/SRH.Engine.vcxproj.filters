@@ -28,6 +28,9 @@
     <Filter Include="Mapping">
       <UniqueIdentifier>{d39f0e9d-0234-4375-b7ec-7ce03c3942ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Execution">
+      <UniqueIdentifier>{c5e25eb1-c9c3-4a77-9651-19e3ba865b9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -69,6 +72,9 @@
     <ClInclude Include="Mapping\MappingService.h">
       <Filter>Mapping</Filter>
     </ClInclude>
+    <ClInclude Include="Execution\ActionExecutor.h">
+      <Filter>Execution</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -88,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="Mapping\MappingService.cpp">
       <Filter>Mapping</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\ActionExecutor.cpp">
+      <Filter>Execution</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
