@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Execution/Windows/Audio/AudioEndpointService.h"
+#include "Execution/Windows/Text/Utf8.h"
 
 #include <Windows.h>
 
@@ -93,122 +94,6 @@ namespace
             false
         };
     };
-
-    std::string WideToUtf8(
-        const std::wstring& value
-    )
-    {
-        if (value.empty())
-        {
-            return {};
-        }
-
-        const int requiredSize =
-            WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                nullptr,
-                0,
-                nullptr,
-                nullptr
-            );
-
-        if (requiredSize <= 0)
-        {
-            return {};
-        }
-
-        std::string result(
-            static_cast<std::size_t>(
-                requiredSize
-                ),
-            '\0'
-        );
-
-        const int converted =
-            WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                result.data(),
-                requiredSize,
-                nullptr,
-                nullptr
-            );
-
-        if (
-            converted !=
-            requiredSize
-            )
-        {
-            return {};
-        }
-
-        return result;
-    }
-
-    std::wstring Utf8ToWide(
-        const std::string& value
-    )
-    {
-        if (value.empty())
-        {
-            return {};
-        }
-
-        const int requiredSize =
-            MultiByteToWideChar(
-                CP_UTF8,
-                MB_ERR_INVALID_CHARS,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                nullptr,
-                0
-            );
-
-        if (requiredSize <= 0)
-        {
-            return {};
-        }
-
-        std::wstring result(
-            static_cast<std::size_t>(
-                requiredSize
-                ),
-            L'\0'
-        );
-
-        const int converted =
-            MultiByteToWideChar(
-                CP_UTF8,
-                MB_ERR_INVALID_CHARS,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                result.data(),
-                requiredSize
-            );
-
-        if (
-            converted !=
-            requiredSize
-            )
-        {
-            return {};
-        }
-
-        return result;
-    }
 
     std::wstring GetDeviceId(
         IMMDevice* device
@@ -380,6 +265,7 @@ namespace
     )
     {
         const std::wstring wideId =
+            srh::engine::windows::
             Utf8ToWide(
                 endpointId
             );
@@ -597,12 +483,12 @@ namespace srh::engine
             AudioEndpointInfo info;
 
             info.id =
-                WideToUtf8(
+                windows::WideToUtf8(
                     id
                 );
 
             info.name =
-                WideToUtf8(
+                windows::WideToUtf8(
                     GetDeviceName(
                         device.Get()
                     )

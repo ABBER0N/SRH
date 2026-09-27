@@ -4,6 +4,7 @@
 
 #include "Devices/DeviceRegistry.h"
 #include "Execution/ActionExecutor.h"
+#include "Execution/Windows/Media/MediaService.h"
 #include "Execution/Windows/WindowsActionExecutor.h"
 #include "Input/InputEventBus.h"
 #include "Input/InputStateStore.h"
@@ -48,6 +49,16 @@ namespace srh::engine
 
         ActionExecutor
             actionExecutor;
+
+        //
+        // System-state services.
+        //
+        // MediaService is stateless. It queries the
+        // current Windows media session on demand.
+        //
+
+        MediaService
+            mediaService;
     };
 
     SrhEngine::SrhEngine()
@@ -314,5 +325,17 @@ namespace srh::engine
             m_impl->mappingService.Resolve(
                 event
             );
+    }
+
+    //
+    // Media state
+    //
+
+    std::optional<MediaSessionInfo>
+        SrhEngine::GetCurrentMediaSession() const
+    {
+        return
+            m_impl->mediaService
+            .GetCurrentSessionInfo();
     }
 }

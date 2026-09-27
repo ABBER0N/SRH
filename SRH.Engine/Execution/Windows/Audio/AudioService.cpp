@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Execution/Windows/Audio/AudioService.h"
+#include "Execution/Windows/Text/Utf8.h"
 
 #include <Windows.h>
 #include <audiopolicy.h>
@@ -48,11 +49,6 @@ namespace
                 RPC_E_CHANGED_MODE
                 )
             {
-                //
-                // COM is already initialized on this
-                // thread using another apartment model.
-                //
-
                 m_ready =
                     true;
 
@@ -88,128 +84,14 @@ namespace
         }
 
     private:
-        bool m_ready{ false };
+        bool m_ready{
+            false
+        };
 
         bool m_shouldUninitialize{
             false
         };
     };
-
-    std::string WideToUtf8(
-        const std::wstring& value
-    )
-    {
-        if (value.empty())
-        {
-            return {};
-        }
-
-        const int requiredSize =
-            WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                nullptr,
-                0,
-                nullptr,
-                nullptr
-            );
-
-        if (requiredSize <= 0)
-        {
-            return {};
-        }
-
-        std::string result(
-            static_cast<std::size_t>(
-                requiredSize
-                ),
-            '\0'
-        );
-
-        const int convertedSize =
-            WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                result.data(),
-                requiredSize,
-                nullptr,
-                nullptr
-            );
-
-        if (
-            convertedSize !=
-            requiredSize
-            )
-        {
-            return {};
-        }
-
-        return result;
-    }
-
-    std::wstring Utf8ToWide(
-        const std::string& value
-    )
-    {
-        if (value.empty())
-        {
-            return {};
-        }
-
-        const int requiredSize =
-            MultiByteToWideChar(
-                CP_UTF8,
-                MB_ERR_INVALID_CHARS,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                nullptr,
-                0
-            );
-
-        if (requiredSize <= 0)
-        {
-            return {};
-        }
-
-        std::wstring result(
-            static_cast<std::size_t>(
-                requiredSize
-                ),
-            L'\0'
-        );
-
-        const int convertedSize =
-            MultiByteToWideChar(
-                CP_UTF8,
-                MB_ERR_INVALID_CHARS,
-                value.data(),
-                static_cast<int>(
-                    value.size()
-                    ),
-                result.data(),
-                requiredSize
-            );
-
-        if (
-            convertedSize !=
-            requiredSize
-            )
-        {
-            return {};
-        }
-
-        return result;
-    }
 
     std::wstring GetProcessExecutablePath(
         const DWORD processId
@@ -921,22 +803,22 @@ namespace srh::engine
             AudioSessionInfo info;
 
             info.sessionInstanceId =
-                WideToUtf8(
+                windows::WideToUtf8(
                     sessionInstanceId
                 );
 
             info.displayName =
-                WideToUtf8(
+                windows::WideToUtf8(
                     displayName
                 );
 
             info.executablePath =
-                WideToUtf8(
+                windows::WideToUtf8(
                     executablePath
                 );
 
             info.executableName =
-                WideToUtf8(
+                windows::WideToUtf8(
                     executableName
                 );
 
@@ -1005,7 +887,7 @@ namespace srh::engine
 
         const std::wstring
             wideSessionInstanceId =
-            Utf8ToWide(
+            windows::Utf8ToWide(
                 sessionInstanceId
             );
 
@@ -1061,7 +943,7 @@ namespace srh::engine
 
         const std::wstring
             wideSessionInstanceId =
-            Utf8ToWide(
+            windows::Utf8ToWide(
                 sessionInstanceId
             );
 

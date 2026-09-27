@@ -1,12 +1,16 @@
-﻿#include "Public/SrhEngine.h"
+﻿#include "ConsoleUtf8.h"
+
+#include "Public/SrhEngine.h"
 
 #include "Execution/Windows/Audio/AudioEndpointService.h"
 #include "Execution/Windows/Audio/AudioService.h"
+#include "Execution/Windows/Text/Utf8.h"
 
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <optional>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -129,6 +133,79 @@ namespace
         return *iterator;
     }
 
+    const char* MediaPlaybackStatusToString(
+        const srh::engine::
+        MediaPlaybackStatus status
+    )
+    {
+        using Status =
+            srh::engine::
+            MediaPlaybackStatus;
+
+        switch (status)
+        {
+        case Status::Closed:
+            return "Closed";
+
+        case Status::Opened:
+            return "Opened";
+
+        case Status::Changing:
+            return "Changing";
+
+        case Status::Stopped:
+            return "Stopped";
+
+        case Status::Playing:
+            return "Playing";
+
+        case Status::Paused:
+            return "Paused";
+
+        case Status::Unknown:
+        default:
+            return "Unknown";
+        }
+    }
+
+    bool TestUtf8RoundTrip()
+    {
+        const std::string original =
+            "Привет, SRH — русский текст — 日本語 — 🚗";
+
+        const std::wstring wide =
+            srh::engine::windows::
+            Utf8ToWide(
+                original
+            );
+
+        if (wide.empty())
+        {
+            return false;
+        }
+
+        const std::string converted =
+            srh::engine::windows::
+            WideToUtf8(
+                wide
+            );
+
+        if (
+            converted !=
+            original
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: UTF-8 text: "
+            << converted
+            << '\n';
+
+        return true;
+    }
+
     bool TestDeviceRegistry(
         srh::engine::SrhEngine& engine
     )
@@ -168,7 +245,7 @@ namespace
             ButtonBox;
 
         node.name =
-            "Smoke Test Node";
+            "Тестовый модуль SRH";
 
         node.connected =
             true;
@@ -209,9 +286,23 @@ namespace
             return false;
         }
 
-        return
-            snapshot.nodes[0].nodeId ==
-            TestNodeId;
+        if (
+            snapshot.nodes[0].nodeId !=
+            TestNodeId
+            )
+        {
+            return false;
+        }
+
+        if (
+            snapshot.nodes[0].name !=
+            "Тестовый модуль SRH"
+            )
+        {
+            return false;
+        }
+
+        return true;
     }
 
     bool TestMapping(
@@ -418,11 +509,6 @@ namespace
             srh::engine::SystemActionKind::
             MasterVolumeAdjust;
 
-        //
-        // Safe no-op:
-        // current volume + 0.0
-        //
-
         action.value =
             0.0f;
 
@@ -542,11 +628,6 @@ namespace
         {
             return false;
         }
-
-        //
-        // Function is implemented,
-        // but target does not exist.
-        //
 
         return
             result.executions[0].status ==
@@ -721,11 +802,6 @@ namespace
         action.targetId =
             endpoint.id;
 
-        //
-        // Safe no-op:
-        // endpoint volume + 0.0
-        //
-
         action.value =
             0.0f;
 
@@ -784,11 +860,6 @@ namespace
 
         action.targetId =
             endpoint.id;
-
-        //
-        // Safe no-op for microphone:
-        // current input level + 0.0
-        //
 
         action.value =
             0.0f;
@@ -877,16 +948,56 @@ namespace
             return false;
         }
 
-        //
-        // Endpoint actions are implemented,
-        // but the requested device does not exist.
-        //
-
         return
             result.executions[0].status ==
             srh::engine::
             ActionExecutionStatus::
             Failed;
+    }
+
+    bool TestMediaState(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        const auto media =
+            engine.GetCurrentMediaSession();
+
+        if (!media.has_value())
+        {
+            std::cout
+                << "INFO: No active Windows media session\n";
+
+            return true;
+        }
+
+        std::cout
+            << "INFO: Media source: "
+            << media->sourceAppId
+            << '\n';
+
+        std::cout
+            << "INFO: Media title: "
+            << media->title
+            << '\n';
+
+        std::cout
+            << "INFO: Media artist: "
+            << media->artist
+            << '\n';
+
+        std::cout
+            << "INFO: Media album: "
+            << media->albumTitle
+            << '\n';
+
+        std::cout
+            << "INFO: Media status: "
+            << MediaPlaybackStatusToString(
+                media->playbackStatus
+            )
+            << '\n';
+
+        return true;
     }
 
     bool TestUnsupportedExecution(
@@ -946,12 +1057,26 @@ namespace
 
 int main()
 {
+    srh::smoketest::
+        ConfigureUtf8Console();
+
     srh::engine::SrhEngine
         engine;
 
     std::cout
         << "SRH.Engine smoke test\n"
         << "---------------------\n";
+
+    if (!TestUtf8RoundTrip())
+    {
+        std::cout
+            << "FAIL: UTF-8 round trip\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: UTF-8 round trip\n";
 
     if (
         !TestDeviceRegistry(
@@ -1132,6 +1257,21 @@ int main()
 
     std::cout
         << "PASS: Missing endpoint routing\n";
+
+    if (
+        !TestMediaState(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Media state query\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Media state query\n";
 
     if (
         !TestUnsupportedExecution(

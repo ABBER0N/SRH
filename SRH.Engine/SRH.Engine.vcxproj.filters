@@ -37,6 +37,12 @@
     <Filter Include="Execution\Windows\Audio">
       <UniqueIdentifier>{7a0194a6-f18e-49d3-872f-722a21948254}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Execution\Windows\Media">
+      <UniqueIdentifier>{89cadf45-b88f-490f-9d07-acb474811765}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Execution\Windows\Text">
+      <UniqueIdentifier>{dc847f64-2573-446c-9a33-81ce3439d541}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -93,6 +99,15 @@
     <ClInclude Include="Execution\Windows\Audio\AudioEndpointService.h">
       <Filter>Execution\Windows\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="Domain\MediaState.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Execution\Windows\Media\MediaService.h">
+      <Filter>Execution\Windows\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="Execution\Windows\Text\Utf8.h">
+      <Filter>Execution\Windows\Text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -124,6 +139,12 @@
     </ClCompile>
     <ClCompile Include="Execution\Windows\Audio\AudioEndpointService.cpp">
       <Filter>Execution\Windows\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\Windows\Media\MediaService.cpp">
+      <Filter>Execution\Windows\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\Windows\Text\Utf8.cpp">
+      <Filter>Execution\Windows\Text</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

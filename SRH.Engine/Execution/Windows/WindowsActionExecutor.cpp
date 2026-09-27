@@ -251,8 +251,30 @@ namespace srh::engine
         }
 
         //
-        // Keyboard
+        // Media
         //
+
+        case SystemActionKind::MediaPlayPause:
+            return
+                m_mediaService.TogglePlayPause()
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+
+        case SystemActionKind::MediaPrevious:
+            return
+                m_mediaService.PreviousTrack()
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+
+        case SystemActionKind::MediaNext:
+            return
+                m_mediaService.NextTrack()
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+
+            //
+            // Keyboard
+            //
 
         case SystemActionKind::KeyboardDown:
             return
@@ -278,37 +300,10 @@ namespace srh::engine
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
 
-            //
-            // Media
-            //
-
-        case SystemActionKind::MediaPlayPause:
-            return
-                SendKeyPress(
-                    VK_MEDIA_PLAY_PAUSE
-                )
-                ? ActionExecutionStatus::Executed
-                : ActionExecutionStatus::Failed;
-
-        case SystemActionKind::MediaPrevious:
-            return
-                SendKeyPress(
-                    VK_MEDIA_PREV_TRACK
-                )
-                ? ActionExecutionStatus::Executed
-                : ActionExecutionStatus::Failed;
-
-        case SystemActionKind::MediaNext:
-            return
-                SendKeyPress(
-                    VK_MEDIA_NEXT_TRACK
-                )
-                ? ActionExecutionStatus::Executed
-                : ActionExecutionStatus::Failed;
-
         default:
             return
-                ActionExecutionStatus::Unsupported;
+                ActionExecutionStatus::
+                Unsupported;
         }
     }
 

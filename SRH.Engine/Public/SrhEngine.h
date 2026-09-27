@@ -5,6 +5,7 @@
 #include "Domain/ExecutionTypes.h"
 #include "Domain/InputEvent.h"
 #include "Domain/InputTypes.h"
+#include "Domain/MediaState.h"
 #include "Mapping/MappingRule.h"
 
 #include <cstdint>
@@ -141,6 +142,14 @@ namespace srh::engine
             ResolveActions(
                 const InputEvent& event
             ) const;
+
+        //
+        // Media state
+        //
+
+        [[nodiscard]]
+        std::optional<MediaSessionInfo>
+            GetCurrentMediaSession() const;
 
     private:
         class Impl;
