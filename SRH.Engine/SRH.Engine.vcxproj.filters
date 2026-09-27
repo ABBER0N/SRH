@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Domain">
+      <UniqueIdentifier>{3b1a867a-1b65-4c44-9328-4ef891b3fb7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Devices">
+      <UniqueIdentifier>{dd2e1612-b987-483c-95d7-91866447f37d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{7f84d119-6fb9-40b5-9035-a1d287f3efa8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -21,13 +30,25 @@
     <ClInclude Include="pch.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Domain\DeviceState.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Devices\DeviceRegistry.h">
+      <Filter>Devices</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\SrhEngine.h">
+      <Filter>Public</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SRH.Engine.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Devices\DeviceRegistry.cpp">
+      <Filter>Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="Public\SrhEngine.cpp">
+      <Filter>Public</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
