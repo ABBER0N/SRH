@@ -1,0 +1,60 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%ProviderName%
+DriverVer=09/20/2026,1.0.0.0
+CatalogFile=SRH.VirtualDevice.Driver.cat
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir=13
+
+[SourceDisksNames]
+1=%DiskName%,,,
+
+[SourceDisksFiles]
+SRH.VirtualDevice.Driver.sys=1
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64.10.0...16299
+
+[Standard.NTamd64.10.0...16299]
+%DeviceDescription%=SRH_Device,ROOT\SRH\VirtualDevice
+
+[SRH_Device.NT]
+CopyFiles=SRH_CopyFiles
+
+[SRH_CopyFiles]
+SRH.VirtualDevice.Driver.sys
+
+; VHF must be loaded below our HID source driver.
+
+[SRH_Device.NT.HW]
+AddReg=SRH_Device_VHF_AddReg
+
+[SRH_Device_VHF_AddReg]
+HKR,,"LowerFilters",0x00010000,"vhf"
+
+[SRH_Device.NT.Services]
+AddService=SRHVirtualDevice,0x00000002,SRH_Service
+
+[SRH_Service]
+DisplayName=%ServiceDescription%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%13%\SRH.VirtualDevice.Driver.sys
+
+[SRH_Device.NT.Wdf]
+KmdfService=SRHVirtualDevice,SRH_WdfSection
+
+[SRH_WdfSection]
+KmdfLibraryVersion=$KMDFVERSION$
+
+[Strings]
+ProviderName="SRH"
+ManufacturerName="SRH"
+DeviceDescription="SRH Virtual Device"
+ServiceDescription="SRH Virtual Device Driver"
+DiskName="SRH Virtual Device Driver Installation Disk"

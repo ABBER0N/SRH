@@ -29,6 +29,44 @@ namespace
     constexpr std::uint32_t
         TestVirtualKey = 0x87;
 
+    constexpr srh::engine::VirtualDeviceId
+        TestVirtualDeviceId = 0;
+
+    class VirtualControllerSessionGuard
+    {
+    public:
+        explicit VirtualControllerSessionGuard(
+            srh::engine::SrhEngine& engine
+        )
+            : m_engine(
+                engine
+            )
+        {
+        }
+
+        ~VirtualControllerSessionGuard()
+        {
+            (void)m_engine
+                .ResetVirtualControllers();
+
+            m_engine
+                .DisconnectVirtualControllerDriver();
+        }
+
+        VirtualControllerSessionGuard(
+            const VirtualControllerSessionGuard&
+        ) = delete;
+
+        VirtualControllerSessionGuard&
+            operator=(
+                const VirtualControllerSessionGuard&
+                ) = delete;
+
+    private:
+        srh::engine::SrhEngine&
+            m_engine;
+    };
+
     void AddSystemActionRule(
         srh::engine::SrhEngine& engine,
         const srh::engine::MappingRuleId ruleId,
@@ -70,10 +108,73 @@ namespace
         );
     }
 
+    void AddVirtualControllerRule(
+        srh::engine::SrhEngine& engine,
+        const srh::engine::MappingRuleId ruleId,
+        const srh::engine::ControlId inputControlId,
+        const srh::engine::InputEventType eventType,
+        const srh::engine::
+        VirtualControllerActionKind actionKind,
+        const srh::engine::ControlId outputControlId,
+        const std::int32_t outputValue
+    )
+    {
+        srh::engine::MappingRule rule;
+
+        rule.id =
+            ruleId;
+
+        rule.enabled =
+            true;
+
+        rule.input.nodeId =
+            TestNodeId;
+
+        rule.input.controlId =
+            inputControlId;
+
+        rule.input.eventType =
+            eventType;
+
+        rule.input.valueCondition =
+            srh::engine::
+            InputValueCondition::
+            Any;
+
+        srh::engine::VirtualControllerAction
+            action;
+
+        action.kind =
+            actionKind;
+
+        action.deviceId =
+            TestVirtualDeviceId;
+
+        action.controlId =
+            outputControlId;
+
+        action.value =
+            outputValue;
+
+        rule.action =
+            action;
+
+        rule.valueMode =
+            srh::engine::
+            ActionValueMode::
+            Fixed;
+
+        engine.AddOrUpdateMappingRule(
+            std::move(rule)
+        );
+    }
+
     srh::engine::InputProcessingResult
-        SubmitButton(
+        SubmitInput(
             srh::engine::SrhEngine& engine,
             const srh::engine::ControlId controlId,
+            const srh::engine::InputEventType type,
+            const std::int32_t value,
             const std::uint64_t timestamp
         )
     {
@@ -86,11 +187,10 @@ namespace
             controlId;
 
         event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
+            type;
 
         event.value =
-            1;
+            value;
 
         event.timestamp =
             timestamp;
@@ -99,6 +199,51 @@ namespace
             engine.SubmitInputEvent(
                 event
             );
+    }
+
+    srh::engine::InputProcessingResult
+        SubmitButton(
+            srh::engine::SrhEngine& engine,
+            const srh::engine::ControlId controlId,
+            const std::uint64_t timestamp
+        )
+    {
+        return
+            SubmitInput(
+                engine,
+                controlId,
+                srh::engine::
+                InputEventType::
+                ButtonDown,
+                1,
+                timestamp
+            );
+    }
+
+    bool IsSingleExecutionSuccessful(
+        const srh::engine::
+        InputProcessingResult& result
+    )
+    {
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Executed &&
+            result.AllExecuted();
     }
 
     std::optional<srh::engine::AudioEndpointInfo>
@@ -225,7 +370,8 @@ namespace
             "1";
 
         hub.health =
-            srh::engine::DeviceHealth::
+            srh::engine::
+            DeviceHealth::
             Healthy;
 
         engine.SetHubState(
@@ -241,7 +387,8 @@ namespace
             0x12345678;
 
         node.type =
-            srh::engine::NodeType::
+            srh::engine::
+            NodeType::
             ButtonBox;
 
         node.name =
@@ -260,7 +407,8 @@ namespace
             true;
 
         node.health =
-            srh::engine::DeviceHealth::
+            srh::engine::
+            DeviceHealth::
             Healthy;
 
         node.firmwareVersion =
@@ -312,7 +460,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             KeyboardPress;
 
         action.code =
@@ -334,7 +483,8 @@ namespace
             KeyboardControlId;
 
         event.type =
-            srh::engine::InputEventType::
+            srh::engine::
+            InputEventType::
             ButtonDown;
 
         event.value =
@@ -472,25 +622,10 @@ namespace
                 3000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Executed &&
-            result.AllExecuted();
+            IsSingleExecutionSuccessful(
+                result
+            );
     }
 
     bool TestMasterAudioExecution(
@@ -506,7 +641,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             MasterVolumeAdjust;
 
         action.value =
@@ -526,25 +662,10 @@ namespace
                 4000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Executed &&
-            result.AllExecuted();
+            IsSingleExecutionSuccessful(
+                result
+            );
     }
 
     bool TestAudioSessionEnumeration()
@@ -593,7 +714,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             ApplicationVolumeSet;
 
         action.targetId =
@@ -796,7 +918,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             EndpointVolumeAdjust;
 
         action.targetId =
@@ -819,25 +942,10 @@ namespace
                 6000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Executed &&
-            result.AllExecuted();
+            IsSingleExecutionSuccessful(
+                result
+            );
     }
 
     bool TestInputEndpointExecution(
@@ -855,7 +963,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             EndpointVolumeAdjust;
 
         action.targetId =
@@ -878,25 +987,10 @@ namespace
                 7000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Executed &&
-            result.AllExecuted();
+            IsSingleExecutionSuccessful(
+                result
+            );
     }
 
     bool TestMissingEndpointRouting(
@@ -912,7 +1006,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             EndpointVolumeSet;
 
         action.targetId =
@@ -1000,6 +1095,435 @@ namespace
         return true;
     }
 
+    bool TestVirtualControllerExecution(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        VirtualControllerSessionGuard
+            sessionGuard(
+                engine
+            );
+
+        if (
+            !engine
+            .ConnectVirtualControllerDriver()
+            )
+        {
+            std::cout
+                << "INFO: Virtual controller driver error: "
+                << engine
+                .GetVirtualControllerDriverError()
+                << '\n';
+
+            return false;
+        }
+
+        if (
+            !engine
+            .IsVirtualControllerDriverConnected()
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual controller driver connected\n";
+
+        //
+        // Input controls used only to trigger
+        // virtual-controller actions.
+        //
+
+        constexpr srh::engine::ControlId
+            ButtonInputControl = 100;
+
+        constexpr srh::engine::ControlId
+            AxisPositiveInputControl = 101;
+
+        constexpr srh::engine::ControlId
+            AxisNegativeInputControl = 102;
+
+        constexpr srh::engine::ControlId
+            AxisCenterInputControl = 103;
+
+        constexpr srh::engine::ControlId
+            PovNorthInputControl = 104;
+
+        constexpr srh::engine::ControlId
+            PovEastInputControl = 105;
+
+        constexpr srh::engine::ControlId
+            PovCenterInputControl = 106;
+
+        constexpr srh::engine::MappingRuleId
+            ButtonDownRule = 100;
+
+        constexpr srh::engine::MappingRuleId
+            ButtonUpRule = 101;
+
+        constexpr srh::engine::MappingRuleId
+            AxisPositiveRule = 102;
+
+        constexpr srh::engine::MappingRuleId
+            AxisNegativeRule = 103;
+
+        constexpr srh::engine::MappingRuleId
+            AxisCenterRule = 104;
+
+        constexpr srh::engine::MappingRuleId
+            PovNorthRule = 105;
+
+        constexpr srh::engine::MappingRuleId
+            PovEastRule = 106;
+
+        constexpr srh::engine::MappingRuleId
+            PovCenterRule = 107;
+
+        //
+        // Virtual Button 1:
+        //
+        // physical ButtonDown -> virtual down
+        // physical ButtonUp   -> virtual up
+        //
+
+        AddVirtualControllerRule(
+            engine,
+            ButtonDownRule,
+            ButtonInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Button,
+            1,
+            1
+        );
+
+        AddVirtualControllerRule(
+            engine,
+            ButtonUpRule,
+            ButtonInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonUp,
+            srh::engine::
+            VirtualControllerActionKind::
+            Button,
+            1,
+            0
+        );
+
+        //
+        // Virtual Axis 1:
+        //
+        // +16384
+        // -16384
+        // 0
+        //
+
+        AddVirtualControllerRule(
+            engine,
+            AxisPositiveRule,
+            AxisPositiveInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Axis,
+            1,
+            16384
+        );
+
+        AddVirtualControllerRule(
+            engine,
+            AxisNegativeRule,
+            AxisNegativeInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Axis,
+            1,
+            -16384
+        );
+
+        AddVirtualControllerRule(
+            engine,
+            AxisCenterRule,
+            AxisCenterInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Axis,
+            1,
+            0
+        );
+
+        //
+        // Virtual POV 1:
+        //
+        // 0     = North
+        // 9000  = East
+        // -1    = Centered
+        //
+
+        AddVirtualControllerRule(
+            engine,
+            PovNorthRule,
+            PovNorthInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Pov,
+            1,
+            0
+        );
+
+        AddVirtualControllerRule(
+            engine,
+            PovEastRule,
+            PovEastInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Pov,
+            1,
+            9000
+        );
+
+        AddVirtualControllerRule(
+            engine,
+            PovCenterRule,
+            PovCenterInputControl,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Pov,
+            1,
+            -1
+        );
+
+        //
+        // Button 1 down.
+        //
+
+        auto result =
+            SubmitInput(
+                engine,
+                ButtonInputControl,
+                srh::engine::
+                InputEventType::
+                ButtonDown,
+                1,
+                10000
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual Button 1 down submitted\n";
+
+        //
+        // Button 1 up.
+        //
+
+        result =
+            SubmitInput(
+                engine,
+                ButtonInputControl,
+                srh::engine::
+                InputEventType::
+                ButtonUp,
+                0,
+                10001
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual Button 1 up submitted\n";
+
+        //
+        // Axis +16384.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                AxisPositiveInputControl,
+                10002
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual Axis 1 = +16384 submitted\n";
+
+        //
+        // Axis -16384.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                AxisNegativeInputControl,
+                10003
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual Axis 1 = -16384 submitted\n";
+
+        //
+        // Axis center.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                AxisCenterInputControl,
+                10004
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual Axis 1 = 0 submitted\n";
+
+        //
+        // POV North.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                PovNorthInputControl,
+                10005
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual POV 1 = North submitted\n";
+
+        //
+        // POV East.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                PovEastInputControl,
+                10006
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual POV 1 = East submitted\n";
+
+        //
+        // POV centered.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                PovCenterInputControl,
+                10007
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual POV 1 = Centered submitted\n";
+
+        //
+        // Explicit final neutral report.
+        //
+
+        if (
+            !engine
+            .ResetVirtualControllers()
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual controller neutral state submitted\n";
+
+        return true;
+    }
+
     bool TestUnsupportedExecution(
         srh::engine::SrhEngine& engine
     )
@@ -1013,7 +1537,8 @@ namespace
         srh::engine::SystemAction action;
 
         action.kind =
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             LaunchApplication;
 
         action.argument =
@@ -1030,7 +1555,7 @@ namespace
             SubmitButton(
                 engine,
                 ControlId,
-                9000
+                11000
             );
 
         if (!result.accepted)
@@ -1272,6 +1797,21 @@ int main()
 
     std::cout
         << "PASS: Media state query\n";
+
+    if (
+        !TestVirtualControllerExecution(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Virtual controller execution\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Virtual controller execution\n";
 
     if (
         !TestUnsupportedExecution(

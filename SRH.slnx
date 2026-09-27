@@ -5,4 +5,8 @@
   </Configurations>
   <Project Path="SRH.Engine.SmokeTest/SRH.Engine.SmokeTest.vcxproj" Id="5c35d8b4-c9ff-463b-94d9-04d868e03724" />
   <Project Path="SRH.Engine/SRH.Engine.vcxproj" Id="381ac699-af26-41fc-9d9d-7e57292ba46b" />
+  <Project Path="SRH.VirtualDevice.Driver/SRH.VirtualDevice.Driver.vcxproj">
+    <Platform Project="x64" />
+    <Deploy />
+  </Project>
 </Solution>
