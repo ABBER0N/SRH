@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace srh::engine
 {
@@ -8,6 +11,24 @@ namespace srh::engine
     {
         float volume{ 0.0f };
         bool muted{ false };
+    };
+
+    struct AudioSessionInfo
+    {
+        std::string sessionInstanceId;
+
+        std::string displayName;
+
+        std::string executableName;
+        std::string executablePath;
+
+        std::uint32_t processId{ 0 };
+
+        float volume{ 0.0f };
+
+        bool muted{ false };
+        bool active{ false };
+        bool systemSounds{ false };
     };
 
     class AudioService
@@ -23,6 +44,10 @@ namespace srh::engine
             const AudioService&
             ) = delete;
 
+        //
+        // Master audio
+        //
+
         [[nodiscard]]
         std::optional<MasterAudioState>
             GetMasterState() const;
@@ -34,6 +59,26 @@ namespace srh::engine
 
         [[nodiscard]]
         bool SetMasterMuted(
+            bool muted
+        ) const;
+
+        //
+        // Application audio sessions
+        //
+
+        [[nodiscard]]
+        std::vector<AudioSessionInfo>
+            EnumerateSessions() const;
+
+        [[nodiscard]]
+        bool SetSessionVolume(
+            const std::string& sessionInstanceId,
+            float volume
+        ) const;
+
+        [[nodiscard]]
+        bool SetSessionMuted(
+            const std::string& sessionInstanceId,
             bool muted
         ) const;
     };

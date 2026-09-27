@@ -4,6 +4,8 @@
 
 #include <Windows.h>
 
+#include <algorithm>
+
 #pragma comment(lib, "User32.lib")
 
 namespace srh::engine
@@ -73,6 +75,131 @@ namespace srh::engine
             return
                 m_audioService.SetMasterMuted(
                     !state->muted
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        //
+        // Application audio
+        //
+
+        case SystemActionKind::ApplicationVolumeSet:
+        {
+            if (action.targetId.empty())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetSessionVolume(
+                    action.targetId,
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::ApplicationVolumeAdjust:
+        {
+            if (action.targetId.empty())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            const auto sessions =
+                m_audioService.EnumerateSessions();
+
+            const auto iterator =
+                std::find_if(
+                    sessions.begin(),
+                    sessions.end(),
+                    [&action](
+                        const AudioSessionInfo& session
+                        )
+                    {
+                        return
+                            session.sessionInstanceId ==
+                            action.targetId;
+                    }
+                );
+
+            if (
+                iterator ==
+                sessions.end()
+                )
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetSessionVolume(
+                    action.targetId,
+                    iterator->volume +
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::ApplicationMuteSet:
+        {
+            if (action.targetId.empty())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetSessionMuted(
+                    action.targetId,
+                    action.state
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::ApplicationMuteToggle:
+        {
+            if (action.targetId.empty())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            const auto sessions =
+                m_audioService.EnumerateSessions();
+
+            const auto iterator =
+                std::find_if(
+                    sessions.begin(),
+                    sessions.end(),
+                    [&action](
+                        const AudioSessionInfo& session
+                        )
+                    {
+                        return
+                            session.sessionInstanceId ==
+                            action.targetId;
+                    }
+                );
+
+            if (
+                iterator ==
+                sessions.end()
+                )
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetSessionMuted(
+                    action.targetId,
+                    !iterator->muted
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;

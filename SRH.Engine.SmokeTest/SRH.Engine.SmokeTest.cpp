@@ -1,5 +1,7 @@
 ﻿#include "Public/SrhEngine.h"
 
+#include "Execution/Windows/Audio/AudioService.h"
+
 #include <cstdint>
 #include <iostream>
 #include <variant>
@@ -368,12 +370,6 @@ namespace
             srh::engine::SystemActionKind::
             MasterVolumeAdjust;
 
-        //
-        // Safe no-op:
-        // read current master volume and write
-        // the same value back.
-        //
-
         action.value =
             0.0f;
 
@@ -428,15 +424,138 @@ namespace
             result.AllExecuted();
     }
 
+    bool TestAudioSessionEnumeration()
+    {
+        srh::engine::AudioService
+            audioService;
+
+        const auto sessions =
+            audioService.EnumerateSessions();
+
+        for (
+            const auto& session :
+            sessions
+            )
+        {
+            if (
+                session.sessionInstanceId
+                .empty()
+                )
+            {
+                return false;
+            }
+
+            if (
+                session.volume < 0.0f ||
+                session.volume > 1.0f
+                )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool TestApplicationAudioRouting(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        constexpr srh::engine::ControlId
+            ApplicationControlId = 21;
+
+        constexpr srh::engine::MappingRuleId
+            ApplicationRuleId = 3;
+
+        srh::engine::MappingRule rule;
+
+        rule.id =
+            ApplicationRuleId;
+
+        rule.enabled =
+            true;
+
+        rule.input.nodeId =
+            TestNodeId;
+
+        rule.input.controlId =
+            ApplicationControlId;
+
+        rule.input.eventType =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            ApplicationVolumeSet;
+
+        action.targetId =
+            "SRH_DOES_NOT_EXIST";
+
+        action.value =
+            0.5f;
+
+        rule.action =
+            action;
+
+        engine.AddOrUpdateMappingRule(
+            rule
+        );
+
+        srh::engine::InputEvent event;
+
+        event.nodeId =
+            TestNodeId;
+
+        event.controlId =
+            ApplicationControlId;
+
+        event.type =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        event.value =
+            1;
+
+        event.timestamp =
+            5000;
+
+        const auto result =
+            engine.SubmitInputEvent(
+                event
+            );
+
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Failed;
+    }
+
     bool TestUnsupportedExecution(
         srh::engine::SrhEngine& engine
     )
     {
         constexpr srh::engine::ControlId
-            UnsupportedControlId = 21;
+            UnsupportedControlId = 22;
 
         constexpr srh::engine::MappingRuleId
-            UnsupportedRuleId = 3;
+            UnsupportedRuleId = 4;
 
         srh::engine::MappingRule rule;
 
@@ -491,7 +610,7 @@ namespace
             1;
 
         event.timestamp =
-            5000;
+            6000;
 
         const auto result =
             engine.SubmitInputEvent(
@@ -603,6 +722,34 @@ int main()
 
     std::cout
         << "PASS: Master audio execution\n";
+
+    if (
+        !TestAudioSessionEnumeration()
+        )
+    {
+        std::cout
+            << "FAIL: Audio session enumeration\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Audio session enumeration\n";
+
+    if (
+        !TestApplicationAudioRouting(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Application audio routing\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Application audio routing\n";
 
     if (
         !TestUnsupportedExecution(
