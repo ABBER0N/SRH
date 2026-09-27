@@ -22,6 +22,9 @@
     <Filter Include="Public">
       <UniqueIdentifier>{7f84d119-6fb9-40b5-9035-a1d287f3efa8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{bbb7a5bf-e0f6-4459-bf42-708df348b8d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -39,6 +42,15 @@
     <ClInclude Include="Public\SrhEngine.h">
       <Filter>Public</Filter>
     </ClInclude>
+    <ClInclude Include="Domain\InputEvent.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Domain\InputTypes.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputStateStore.h">
+      <Filter>Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -49,6 +61,9 @@
     </ClCompile>
     <ClCompile Include="Public\SrhEngine.cpp">
       <Filter>Public</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputStateStore.cpp">
+      <Filter>Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

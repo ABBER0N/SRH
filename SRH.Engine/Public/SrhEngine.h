@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Domain/DeviceState.h"
-
+#include "Domain/InputEvent.h"
+#include "Domain/InputTypes.h"
 #include <memory>
 #include <optional>
 
@@ -29,6 +30,10 @@ namespace srh::engine
             SrhEngine&&
             ) noexcept;
 
+        //
+        // Devices
+        //
+
         void SetHubState(
             HubState state
         );
@@ -53,6 +58,27 @@ namespace srh::engine
 
         [[nodiscard]]
         DeviceSnapshot GetDeviceSnapshot() const;
+
+        //
+        // Input
+        //
+
+        [[nodiscard]]
+        bool SubmitInputEvent(
+            const InputEvent& event
+        );
+
+        [[nodiscard]]
+        std::optional<InputControlState>
+            FindInputState(
+                NodeId nodeId,
+                ControlId controlId
+            ) const;
+
+        [[nodiscard]]
+        InputSnapshot GetInputSnapshot() const;
+
+        void ClearInputState();
 
     private:
         class Impl;

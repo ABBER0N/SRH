@@ -1,7 +1,5 @@
 #include "pch.h"
-
 #include "Devices/DeviceRegistry.h"
-
 #include <algorithm>
 #include <mutex>
 #include <utility>

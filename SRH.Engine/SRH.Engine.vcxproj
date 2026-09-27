@@ -157,12 +157,16 @@
   <ItemGroup>
     <ClInclude Include="Devices\DeviceRegistry.h" />
     <ClInclude Include="Domain\DeviceState.h" />
+    <ClInclude Include="Domain\InputEvent.h" />
+    <ClInclude Include="Domain\InputTypes.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Input\InputStateStore.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Public\SrhEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Devices\DeviceRegistry.cpp" />
+    <ClCompile Include="Input\InputStateStore.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
