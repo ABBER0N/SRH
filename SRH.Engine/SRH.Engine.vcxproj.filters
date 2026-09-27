@@ -90,6 +90,9 @@
     <ClInclude Include="Execution\Windows\Audio\AudioService.h">
       <Filter>Execution\Windows\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="Execution\Windows\Audio\AudioEndpointService.h">
+      <Filter>Execution\Windows\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -117,6 +120,9 @@
       <Filter>Execution\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Execution\Windows\Audio\AudioService.cpp">
+      <Filter>Execution\Windows\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\Windows\Audio\AudioEndpointService.cpp">
       <Filter>Execution\Windows\Audio</Filter>
     </ClCompile>
   </ItemGroup>

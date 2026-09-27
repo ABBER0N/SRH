@@ -22,14 +22,12 @@ namespace srh::engine
             //
 
         case SystemActionKind::MasterVolumeSet:
-        {
             return
                 m_audioService.SetMasterVolume(
                     action.value
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
-        }
 
         case SystemActionKind::MasterVolumeAdjust:
         {
@@ -52,14 +50,12 @@ namespace srh::engine
         }
 
         case SystemActionKind::MasterMuteSet:
-        {
             return
                 m_audioService.SetMasterMuted(
                     action.state
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
-        }
 
         case SystemActionKind::MasterMuteToggle:
         {
@@ -85,30 +81,17 @@ namespace srh::engine
         //
 
         case SystemActionKind::ApplicationVolumeSet:
-        {
-            if (action.targetId.empty())
-            {
-                return
-                    ActionExecutionStatus::Failed;
-            }
-
             return
+                !action.targetId.empty() &&
                 m_audioService.SetSessionVolume(
                     action.targetId,
                     action.value
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
-        }
 
         case SystemActionKind::ApplicationVolumeAdjust:
         {
-            if (action.targetId.empty())
-            {
-                return
-                    ActionExecutionStatus::Failed;
-            }
-
             const auto sessions =
                 m_audioService.EnumerateSessions();
 
@@ -146,30 +129,17 @@ namespace srh::engine
         }
 
         case SystemActionKind::ApplicationMuteSet:
-        {
-            if (action.targetId.empty())
-            {
-                return
-                    ActionExecutionStatus::Failed;
-            }
-
             return
+                !action.targetId.empty() &&
                 m_audioService.SetSessionMuted(
                     action.targetId,
                     action.state
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
-        }
 
         case SystemActionKind::ApplicationMuteToggle:
         {
-            if (action.targetId.empty())
-            {
-                return
-                    ActionExecutionStatus::Failed;
-            }
-
             const auto sessions =
                 m_audioService.EnumerateSessions();
 
@@ -200,6 +170,81 @@ namespace srh::engine
                 m_audioService.SetSessionMuted(
                     action.targetId,
                     !iterator->muted
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        //
+        // Audio endpoints
+        //
+
+        case SystemActionKind::EndpointVolumeSet:
+            return
+                !action.targetId.empty() &&
+                m_audioEndpointService
+                .SetEndpointVolume(
+                    action.targetId,
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+
+        case SystemActionKind::EndpointVolumeAdjust:
+        {
+            const auto endpoint =
+                m_audioEndpointService
+                .FindEndpoint(
+                    action.targetId
+                );
+
+            if (!endpoint.has_value())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioEndpointService
+                .SetEndpointVolume(
+                    action.targetId,
+                    endpoint->volume +
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::EndpointMuteSet:
+            return
+                !action.targetId.empty() &&
+                m_audioEndpointService
+                .SetEndpointMuted(
+                    action.targetId,
+                    action.state
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+
+        case SystemActionKind::EndpointMuteToggle:
+        {
+            const auto endpoint =
+                m_audioEndpointService
+                .FindEndpoint(
+                    action.targetId
+                );
+
+            if (!endpoint.has_value())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioEndpointService
+                .SetEndpointMuted(
+                    action.targetId,
+                    !endpoint->muted
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
@@ -263,8 +308,7 @@ namespace srh::engine
 
         default:
             return
-                ActionExecutionStatus::
-                Unsupported;
+                ActionExecutionStatus::Unsupported;
         }
     }
 
@@ -289,9 +333,6 @@ namespace srh::engine
             static_cast<WORD>(
                 virtualKeyCode
                 );
-
-        input.ki.dwFlags =
-            0;
 
         return
             SendInput(

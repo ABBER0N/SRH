@@ -1,10 +1,15 @@
 ﻿#include "Public/SrhEngine.h"
 
+#include "Execution/Windows/Audio/AudioEndpointService.h"
 #include "Execution/Windows/Audio/AudioService.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <optional>
+#include <utility>
 #include <variant>
+#include <vector>
 
 namespace
 {
@@ -12,13 +17,117 @@ namespace
         TestNodeId = 1;
 
     constexpr srh::engine::ControlId
-        TestControlId = 10;
+        KeyboardControlId = 10;
 
     constexpr srh::engine::MappingRuleId
-        TestMappingRuleId = 1;
+        KeyboardRuleId = 1;
 
     constexpr std::uint32_t
         TestVirtualKey = 0x87;
+
+    void AddSystemActionRule(
+        srh::engine::SrhEngine& engine,
+        const srh::engine::MappingRuleId ruleId,
+        const srh::engine::ControlId controlId,
+        srh::engine::SystemAction action
+    )
+    {
+        srh::engine::MappingRule rule;
+
+        rule.id =
+            ruleId;
+
+        rule.enabled =
+            true;
+
+        rule.input.nodeId =
+            TestNodeId;
+
+        rule.input.controlId =
+            controlId;
+
+        rule.input.eventType =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        rule.input.valueCondition =
+            srh::engine::InputValueCondition::
+            Any;
+
+        rule.action =
+            std::move(action);
+
+        rule.valueMode =
+            srh::engine::ActionValueMode::
+            Fixed;
+
+        engine.AddOrUpdateMappingRule(
+            std::move(rule)
+        );
+    }
+
+    srh::engine::InputProcessingResult
+        SubmitButton(
+            srh::engine::SrhEngine& engine,
+            const srh::engine::ControlId controlId,
+            const std::uint64_t timestamp
+        )
+    {
+        srh::engine::InputEvent event;
+
+        event.nodeId =
+            TestNodeId;
+
+        event.controlId =
+            controlId;
+
+        event.type =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        event.value =
+            1;
+
+        event.timestamp =
+            timestamp;
+
+        return
+            engine.SubmitInputEvent(
+                event
+            );
+    }
+
+    std::optional<srh::engine::AudioEndpointInfo>
+        FindDefaultEndpoint(
+            const std::vector<
+            srh::engine::AudioEndpointInfo
+            >& endpoints
+        )
+    {
+        const auto iterator =
+            std::find_if(
+                endpoints.begin(),
+                endpoints.end(),
+                [](
+                    const srh::engine::
+                    AudioEndpointInfo& endpoint
+                    )
+                {
+                    return
+                        endpoint.isDefault;
+                }
+            );
+
+        if (
+            iterator ==
+            endpoints.end()
+            )
+        {
+            return std::nullopt;
+        }
+
+        return *iterator;
+    }
 
     bool TestDeviceRegistry(
         srh::engine::SrhEngine& engine
@@ -26,12 +135,21 @@ namespace
     {
         srh::engine::HubState hub;
 
-        hub.connected = true;
-        hub.name = "SRH Test Hub";
-        hub.firmwareVersion = "0.1.0";
-        hub.protocolVersion = "1";
+        hub.connected =
+            true;
+
+        hub.name =
+            "SRH Test Hub";
+
+        hub.firmwareVersion =
+            "0.1.0";
+
+        hub.protocolVersion =
+            "1";
+
         hub.health =
-            srh::engine::DeviceHealth::Healthy;
+            srh::engine::DeviceHealth::
+            Healthy;
 
         engine.SetHubState(
             hub
@@ -46,7 +164,8 @@ namespace
             0x12345678;
 
         node.type =
-            srh::engine::NodeType::ButtonBox;
+            srh::engine::NodeType::
+            ButtonBox;
 
         node.name =
             "Smoke Test Node";
@@ -64,7 +183,8 @@ namespace
             true;
 
         node.health =
-            srh::engine::DeviceHealth::Healthy;
+            srh::engine::DeviceHealth::
+            Healthy;
 
         node.firmwareVersion =
             "0.1.0";
@@ -98,28 +218,6 @@ namespace
         srh::engine::SrhEngine& engine
     )
     {
-        srh::engine::MappingRule rule;
-
-        rule.id =
-            TestMappingRuleId;
-
-        rule.enabled =
-            true;
-
-        rule.input.nodeId =
-            TestNodeId;
-
-        rule.input.controlId =
-            TestControlId;
-
-        rule.input.eventType =
-            srh::engine::InputEventType::
-            ButtonDown;
-
-        rule.input.valueCondition =
-            srh::engine::InputValueCondition::
-            Any;
-
         srh::engine::SystemAction action;
 
         action.kind =
@@ -129,15 +227,11 @@ namespace
         action.code =
             TestVirtualKey;
 
-        rule.action =
-            action;
-
-        rule.valueMode =
-            srh::engine::ActionValueMode::
-            Fixed;
-
-        engine.AddOrUpdateMappingRule(
-            rule
+        AddSystemActionRule(
+            engine,
+            KeyboardRuleId,
+            KeyboardControlId,
+            action
         );
 
         srh::engine::InputEvent event;
@@ -146,7 +240,7 @@ namespace
             TestNodeId;
 
         event.controlId =
-            TestControlId;
+            KeyboardControlId;
 
         event.type =
             srh::engine::InputEventType::
@@ -188,7 +282,8 @@ namespace
 
         return
             systemAction->kind ==
-            srh::engine::SystemActionKind::
+            srh::engine::
+            SystemActionKind::
             KeyboardPress &&
             systemAction->code ==
             TestVirtualKey;
@@ -204,16 +299,18 @@ namespace
         const auto subscriptionId =
             engine.SubscribeInput(
                 [&receivedEvents](
-                    const srh::engine::InputEvent& event
+                    const srh::engine::
+                    InputEvent& event
                     )
                 {
                     if (
                         event.nodeId ==
                         TestNodeId &&
                         event.controlId ==
-                        TestControlId &&
+                        KeyboardControlId &&
                         event.type ==
-                        srh::engine::InputEventType::
+                        srh::engine::
+                        InputEventType::
                         ButtonDown
                         )
                     {
@@ -230,27 +327,11 @@ namespace
             return false;
         }
 
-        srh::engine::InputEvent event;
-
-        event.nodeId =
-            TestNodeId;
-
-        event.controlId =
-            TestControlId;
-
-        event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
-
-        event.value =
-            1;
-
-        event.timestamp =
-            2000;
-
         const auto result =
-            engine.SubmitInputEvent(
-                event
+            SubmitButton(
+                engine,
+                KeyboardControlId,
+                2000
             );
 
         engine.UnsubscribeInput(
@@ -273,7 +354,7 @@ namespace
         const auto state =
             engine.FindInputState(
                 TestNodeId,
-                TestControlId
+                KeyboardControlId
             );
 
         if (!state.has_value())
@@ -284,7 +365,8 @@ namespace
         return
             state->value == 1 &&
             state->type ==
-            srh::engine::InputEventType::
+            srh::engine::
+            InputEventType::
             ButtonDown;
     }
 
@@ -292,27 +374,11 @@ namespace
         srh::engine::SrhEngine& engine
     )
     {
-        srh::engine::InputEvent event;
-
-        event.nodeId =
-            TestNodeId;
-
-        event.controlId =
-            TestControlId;
-
-        event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
-
-        event.value =
-            1;
-
-        event.timestamp =
-            3000;
-
         const auto result =
-            engine.SubmitInputEvent(
-                event
+            SubmitButton(
+                engine,
+                KeyboardControlId,
+                3000
             );
 
         if (!result.accepted)
@@ -341,28 +407,10 @@ namespace
     )
     {
         constexpr srh::engine::ControlId
-            AudioControlId = 20;
+            ControlId = 20;
 
         constexpr srh::engine::MappingRuleId
-            AudioRuleId = 2;
-
-        srh::engine::MappingRule rule;
-
-        rule.id =
-            AudioRuleId;
-
-        rule.enabled =
-            true;
-
-        rule.input.nodeId =
-            TestNodeId;
-
-        rule.input.controlId =
-            AudioControlId;
-
-        rule.input.eventType =
-            srh::engine::InputEventType::
-            ButtonDown;
+            RuleId = 2;
 
         srh::engine::SystemAction action;
 
@@ -370,37 +418,26 @@ namespace
             srh::engine::SystemActionKind::
             MasterVolumeAdjust;
 
+        //
+        // Safe no-op:
+        // current volume + 0.0
+        //
+
         action.value =
             0.0f;
 
-        rule.action =
-            action;
-
-        engine.AddOrUpdateMappingRule(
-            rule
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
         );
 
-        srh::engine::InputEvent event;
-
-        event.nodeId =
-            TestNodeId;
-
-        event.controlId =
-            AudioControlId;
-
-        event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
-
-        event.value =
-            1;
-
-        event.timestamp =
-            4000;
-
         const auto result =
-            engine.SubmitInputEvent(
-                event
+            SubmitButton(
+                engine,
+                ControlId,
+                4000
             );
 
         if (!result.accepted)
@@ -462,28 +499,10 @@ namespace
     )
     {
         constexpr srh::engine::ControlId
-            ApplicationControlId = 21;
+            ControlId = 21;
 
         constexpr srh::engine::MappingRuleId
-            ApplicationRuleId = 3;
-
-        srh::engine::MappingRule rule;
-
-        rule.id =
-            ApplicationRuleId;
-
-        rule.enabled =
-            true;
-
-        rule.input.nodeId =
-            TestNodeId;
-
-        rule.input.controlId =
-            ApplicationControlId;
-
-        rule.input.eventType =
-            srh::engine::InputEventType::
-            ButtonDown;
+            RuleId = 3;
 
         srh::engine::SystemAction action;
 
@@ -497,34 +516,231 @@ namespace
         action.value =
             0.5f;
 
-        rule.action =
-            action;
-
-        engine.AddOrUpdateMappingRule(
-            rule
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
         );
 
-        srh::engine::InputEvent event;
+        const auto result =
+            SubmitButton(
+                engine,
+                ControlId,
+                5000
+            );
 
-        event.nodeId =
-            TestNodeId;
+        if (!result.accepted)
+        {
+            return false;
+        }
 
-        event.controlId =
-            ApplicationControlId;
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
 
-        event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
+        //
+        // Function is implemented,
+        // but target does not exist.
+        //
 
-        event.value =
-            1;
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Failed;
+    }
 
-        event.timestamp =
-            5000;
+    bool TestEndpointEnumeration(
+        std::optional<
+        srh::engine::AudioEndpointInfo
+        >& defaultOutput,
+        std::optional<
+        srh::engine::AudioEndpointInfo
+        >& defaultInput
+    )
+    {
+        srh::engine::AudioEndpointService
+            service;
+
+        const auto outputs =
+            service.EnumerateOutputDevices();
+
+        const auto inputs =
+            service.EnumerateInputDevices();
+
+        if (outputs.empty())
+        {
+            return false;
+        }
+
+        if (inputs.empty())
+        {
+            return false;
+        }
+
+        for (
+            const auto& endpoint :
+            outputs
+            )
+        {
+            if (endpoint.id.empty())
+            {
+                return false;
+            }
+
+            if (
+                endpoint.type !=
+                srh::engine::
+                AudioEndpointType::
+                Render
+                )
+            {
+                return false;
+            }
+
+            if (
+                endpoint.volume < 0.0f ||
+                endpoint.volume > 1.0f
+                )
+            {
+                return false;
+            }
+        }
+
+        for (
+            const auto& endpoint :
+            inputs
+            )
+        {
+            if (endpoint.id.empty())
+            {
+                return false;
+            }
+
+            if (
+                endpoint.type !=
+                srh::engine::
+                AudioEndpointType::
+                Capture
+                )
+            {
+                return false;
+            }
+
+            if (
+                endpoint.volume < 0.0f ||
+                endpoint.volume > 1.0f
+                )
+            {
+                return false;
+            }
+        }
+
+        const auto defaultOutputCount =
+            std::count_if(
+                outputs.begin(),
+                outputs.end(),
+                [](
+                    const srh::engine::
+                    AudioEndpointInfo& endpoint
+                    )
+                {
+                    return
+                        endpoint.isDefault;
+                }
+            );
+
+        const auto defaultInputCount =
+            std::count_if(
+                inputs.begin(),
+                inputs.end(),
+                [](
+                    const srh::engine::
+                    AudioEndpointInfo& endpoint
+                    )
+                {
+                    return
+                        endpoint.isDefault;
+                }
+            );
+
+        if (
+            defaultOutputCount !=
+            1
+            )
+        {
+            return false;
+        }
+
+        if (
+            defaultInputCount !=
+            1
+            )
+        {
+            return false;
+        }
+
+        defaultOutput =
+            FindDefaultEndpoint(
+                outputs
+            );
+
+        defaultInput =
+            FindDefaultEndpoint(
+                inputs
+            );
+
+        return
+            defaultOutput.has_value() &&
+            defaultInput.has_value();
+    }
+
+    bool TestOutputEndpointExecution(
+        srh::engine::SrhEngine& engine,
+        const srh::engine::
+        AudioEndpointInfo& endpoint
+    )
+    {
+        constexpr srh::engine::ControlId
+            ControlId = 30;
+
+        constexpr srh::engine::MappingRuleId
+            RuleId = 4;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            EndpointVolumeAdjust;
+
+        action.targetId =
+            endpoint.id;
+
+        //
+        // Safe no-op:
+        // endpoint volume + 0.0
+        //
+
+        action.value =
+            0.0f;
+
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
+        );
 
         const auto result =
-            engine.SubmitInputEvent(
-                event
+            SubmitButton(
+                engine,
+                ControlId,
+                6000
             );
 
         if (!result.accepted)
@@ -544,36 +760,83 @@ namespace
             result.executions[0].status ==
             srh::engine::
             ActionExecutionStatus::
-            Failed;
+            Executed &&
+            result.AllExecuted();
     }
 
-    bool TestUnsupportedExecution(
+    bool TestInputEndpointExecution(
+        srh::engine::SrhEngine& engine,
+        const srh::engine::
+        AudioEndpointInfo& endpoint
+    )
+    {
+        constexpr srh::engine::ControlId
+            ControlId = 31;
+
+        constexpr srh::engine::MappingRuleId
+            RuleId = 5;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            EndpointVolumeAdjust;
+
+        action.targetId =
+            endpoint.id;
+
+        //
+        // Safe no-op for microphone:
+        // current input level + 0.0
+        //
+
+        action.value =
+            0.0f;
+
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
+        );
+
+        const auto result =
+            SubmitButton(
+                engine,
+                ControlId,
+                7000
+            );
+
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Executed &&
+            result.AllExecuted();
+    }
+
+    bool TestMissingEndpointRouting(
         srh::engine::SrhEngine& engine
     )
     {
         constexpr srh::engine::ControlId
-            UnsupportedControlId = 22;
+            ControlId = 32;
 
         constexpr srh::engine::MappingRuleId
-            UnsupportedRuleId = 4;
-
-        srh::engine::MappingRule rule;
-
-        rule.id =
-            UnsupportedRuleId;
-
-        rule.enabled =
-            true;
-
-        rule.input.nodeId =
-            TestNodeId;
-
-        rule.input.controlId =
-            UnsupportedControlId;
-
-        rule.input.eventType =
-            srh::engine::InputEventType::
-            ButtonDown;
+            RuleId = 6;
 
         srh::engine::SystemAction action;
 
@@ -582,39 +845,81 @@ namespace
             EndpointVolumeSet;
 
         action.targetId =
-            "not-yet-implemented";
+            "SRH_ENDPOINT_DOES_NOT_EXIST";
 
         action.value =
             0.5f;
 
-        rule.action =
-            action;
-
-        engine.AddOrUpdateMappingRule(
-            rule
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
         );
 
-        srh::engine::InputEvent event;
+        const auto result =
+            SubmitButton(
+                engine,
+                ControlId,
+                8000
+            );
 
-        event.nodeId =
-            TestNodeId;
+        if (!result.accepted)
+        {
+            return false;
+        }
 
-        event.controlId =
-            UnsupportedControlId;
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
 
-        event.type =
-            srh::engine::InputEventType::
-            ButtonDown;
+        //
+        // Endpoint actions are implemented,
+        // but the requested device does not exist.
+        //
 
-        event.value =
-            1;
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Failed;
+    }
 
-        event.timestamp =
-            6000;
+    bool TestUnsupportedExecution(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        constexpr srh::engine::ControlId
+            ControlId = 40;
+
+        constexpr srh::engine::MappingRuleId
+            RuleId = 7;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            LaunchApplication;
+
+        action.argument =
+            "not-yet-implemented";
+
+        AddSystemActionRule(
+            engine,
+            RuleId,
+            ControlId,
+            action
+        );
 
         const auto result =
-            engine.SubmitInputEvent(
-                event
+            SubmitButton(
+                engine,
+                ControlId,
+                9000
             );
 
         if (!result.accepted)
@@ -750,6 +1055,83 @@ int main()
 
     std::cout
         << "PASS: Application audio routing\n";
+
+    std::optional<
+        srh::engine::AudioEndpointInfo
+    > defaultOutput;
+
+    std::optional<
+        srh::engine::AudioEndpointInfo
+    > defaultInput;
+
+    if (
+        !TestEndpointEnumeration(
+            defaultOutput,
+            defaultInput
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Audio endpoint enumeration\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Audio endpoint enumeration\n";
+
+    std::cout
+        << "PASS: Default output detection\n";
+
+    std::cout
+        << "PASS: Default input detection\n";
+
+    if (
+        !TestOutputEndpointExecution(
+            engine,
+            *defaultOutput
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Output endpoint execution\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Output endpoint execution\n";
+
+    if (
+        !TestInputEndpointExecution(
+            engine,
+            *defaultInput
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Input endpoint execution\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Input endpoint execution\n";
+
+    if (
+        !TestMissingEndpointRouting(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Missing endpoint routing\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Missing endpoint routing\n";
 
     if (
         !TestUnsupportedExecution(

@@ -2,6 +2,7 @@
 
 #include "Domain/Action.h"
 #include "Domain/ExecutionTypes.h"
+#include "Execution/Windows/Audio/AudioEndpointService.h"
 #include "Execution/Windows/Audio/AudioService.h"
 
 namespace srh::engine
@@ -42,5 +43,8 @@ namespace srh::engine
 
         AudioService
             m_audioService;
+
+        AudioEndpointService
+            m_audioEndpointService;
     };
 }
