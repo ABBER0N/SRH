@@ -43,6 +43,9 @@
     <Filter Include="Execution\Windows\Text">
       <UniqueIdentifier>{dc847f64-2573-446c-9a33-81ce3439d541}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Execution\VirtualController">
+      <UniqueIdentifier>{2f55658f-5a33-4a20-a694-ec1ff82da84b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -108,6 +111,15 @@
     <ClInclude Include="Execution\Windows\Text\Utf8.h">
       <Filter>Execution\Windows\Text</Filter>
     </ClInclude>
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceClient.h">
+      <Filter>Execution\VirtualController</Filter>
+    </ClInclude>
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceInterface.h">
+      <Filter>Execution\VirtualController</Filter>
+    </ClInclude>
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceProtocol.h">
+      <Filter>Execution\VirtualController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -145,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="Execution\Windows\Text\Utf8.cpp">
       <Filter>Execution\Windows\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\VirtualController\VirtualDeviceClient.cpp">
+      <Filter>Execution\VirtualController</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

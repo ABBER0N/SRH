@@ -168,6 +168,9 @@
     <ClInclude Include="Domain\InputTypes.h" />
     <ClInclude Include="Domain\MediaState.h" />
     <ClInclude Include="Execution\ActionExecutor.h" />
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceClient.h" />
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceInterface.h" />
+    <ClInclude Include="Execution\VirtualController\VirtualDeviceProtocol.h" />
     <ClInclude Include="Execution\Windows\Audio\AudioEndpointService.h" />
     <ClInclude Include="Execution\Windows\Audio\AudioService.h" />
     <ClInclude Include="Execution\Windows\Media\MediaService.h" />
@@ -184,6 +187,7 @@
   <ItemGroup>
     <ClCompile Include="Devices\DeviceRegistry.cpp" />
     <ClCompile Include="Execution\ActionExecutor.cpp" />
+    <ClCompile Include="Execution\VirtualController\VirtualDeviceClient.cpp" />
     <ClCompile Include="Execution\Windows\Audio\AudioEndpointService.cpp" />
     <ClCompile Include="Execution\Windows\Audio\AudioService.cpp" />
     <ClCompile Include="Execution\Windows\Media\MediaService.cpp" />
