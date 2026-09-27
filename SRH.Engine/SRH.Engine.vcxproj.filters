@@ -120,6 +120,9 @@
     <ClInclude Include="Execution\VirtualController\VirtualDeviceProtocol.h">
       <Filter>Execution\VirtualController</Filter>
     </ClInclude>
+    <ClInclude Include="Execution\VirtualController\VirtualControllerService.h">
+      <Filter>Execution\VirtualController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -159,6 +162,9 @@
       <Filter>Execution\Windows\Text</Filter>
     </ClCompile>
     <ClCompile Include="Execution\VirtualController\VirtualDeviceClient.cpp">
+      <Filter>Execution\VirtualController</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\VirtualController\VirtualControllerService.cpp">
       <Filter>Execution\VirtualController</Filter>
     </ClCompile>
   </ItemGroup>
