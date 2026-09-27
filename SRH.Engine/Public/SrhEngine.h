@@ -144,6 +144,30 @@ namespace srh::engine
             ) const;
 
         //
+        // Virtual controller
+        //
+
+        [[nodiscard]]
+        bool ConnectVirtualControllerDriver()
+            noexcept;
+
+        void DisconnectVirtualControllerDriver()
+            noexcept;
+
+        [[nodiscard]]
+        bool IsVirtualControllerDriverConnected()
+            const noexcept;
+
+        [[nodiscard]]
+        std::uint32_t
+            GetVirtualControllerDriverError()
+            const noexcept;
+
+        [[nodiscard]]
+        bool ResetVirtualControllers()
+            noexcept;
+
+        //
         // Media state
         //
 

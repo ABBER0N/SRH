@@ -16,6 +16,8 @@ namespace srh::engine::virtual_controller
     public:
         VirtualControllerService() = default;
 
+        ~VirtualControllerService();
+
         VirtualControllerService(
             const VirtualControllerService&
         ) = delete;
@@ -27,7 +29,7 @@ namespace srh::engine::virtual_controller
         [[nodiscard]]
         ActionExecutionStatus Execute(
             const VirtualControllerAction& action
-        ) noexcept;
+        );
 
         [[nodiscard]]
         bool ConnectFirstAvailable()
@@ -44,12 +46,17 @@ namespace srh::engine::virtual_controller
         std::uint32_t LastError() const
             noexcept;
 
-        void ClearState()
+        [[nodiscard]]
+        bool ResetAll()
             noexcept;
 
     private:
         [[nodiscard]]
         bool EnsureConnected()
+            noexcept;
+
+        [[nodiscard]]
+        bool NeutralizeAllLocked()
             noexcept;
 
         [[nodiscard]]
@@ -77,7 +84,6 @@ namespace srh::engine::virtual_controller
         std::unordered_map<
             std::uint16_t,
             InputReportV1
-        >
-            m_reports;
+        > m_reports;
     };
 }

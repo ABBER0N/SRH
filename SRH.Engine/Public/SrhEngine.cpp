@@ -4,6 +4,7 @@
 
 #include "Devices/DeviceRegistry.h"
 #include "Execution/ActionExecutor.h"
+#include "Execution/VirtualController/VirtualControllerService.h"
 #include "Execution/Windows/Media/MediaService.h"
 #include "Execution/Windows/WindowsActionExecutor.h"
 #include "Input/InputEventBus.h"
@@ -19,6 +20,18 @@ namespace srh::engine
     public:
         Impl()
         {
+            actionExecutor.SetVirtualControllerHandler(
+                [this](
+                    const VirtualControllerAction& action
+                    )
+                {
+                    return
+                        virtualControllerService.Execute(
+                            action
+                        );
+                }
+            );
+
             actionExecutor.SetSystemHandler(
                 [this](
                     const SystemAction& action
@@ -44,18 +57,15 @@ namespace srh::engine
         MappingService
             mappingService;
 
+        virtual_controller::
+            VirtualControllerService
+            virtualControllerService;
+
         WindowsActionExecutor
             windowsActionExecutor;
 
         ActionExecutor
             actionExecutor;
-
-        //
-        // System-state services.
-        //
-        // MediaService is stateless. It queries the
-        // current Windows media session on demand.
-        //
 
         MediaService
             mediaService;
@@ -218,8 +228,7 @@ namespace srh::engine
         ) const
     {
         return
-            m_impl->inputStateStore
-            .Find(
+            m_impl->inputStateStore.Find(
                 nodeId,
                 controlId
             );
@@ -328,11 +337,66 @@ namespace srh::engine
     }
 
     //
+    // Virtual controller
+    //
+
+    bool SrhEngine::
+        ConnectVirtualControllerDriver()
+        noexcept
+    {
+        return
+            m_impl->
+            virtualControllerService
+            .ConnectFirstAvailable();
+    }
+
+    void SrhEngine::
+        DisconnectVirtualControllerDriver()
+        noexcept
+    {
+        m_impl->
+            virtualControllerService
+            .Disconnect();
+    }
+
+    bool SrhEngine::
+        IsVirtualControllerDriverConnected()
+        const noexcept
+    {
+        return
+            m_impl->
+            virtualControllerService
+            .IsConnected();
+    }
+
+    std::uint32_t
+        SrhEngine::
+        GetVirtualControllerDriverError()
+        const noexcept
+    {
+        return
+            m_impl->
+            virtualControllerService
+            .LastError();
+    }
+
+    bool SrhEngine::
+        ResetVirtualControllers()
+        noexcept
+    {
+        return
+            m_impl->
+            virtualControllerService
+            .ResetAll();
+    }
+
+    //
     // Media state
     //
 
     std::optional<MediaSessionInfo>
-        SrhEngine::GetCurrentMediaSession() const
+        SrhEngine::GetCurrentMediaSession()
+        const
     {
         return
             m_impl->mediaService

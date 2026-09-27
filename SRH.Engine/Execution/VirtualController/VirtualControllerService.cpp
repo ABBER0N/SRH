@@ -7,10 +7,16 @@
 
 namespace srh::engine::virtual_controller
 {
+    VirtualControllerService::
+        ~VirtualControllerService()
+    {
+        Disconnect();
+    }
+
     ActionExecutionStatus
         VirtualControllerService::Execute(
             const VirtualControllerAction& action
-        ) noexcept
+        )
     {
         std::scoped_lock lock(
             m_mutex
@@ -40,18 +46,28 @@ namespace srh::engine::virtual_controller
                 Failed;
         }
 
-        const bool submitted =
-            m_client.SubmitReport(
+        if (
+            !m_client.SubmitReport(
                 action.deviceId,
                 report
-            );
+            )
+            )
+        {
+            //
+            // Do not retain a potentially dead handle.
+            // The next action will attempt to reconnect.
+            //
+
+            m_client.Close();
+
+            return
+                ActionExecutionStatus::
+                Failed;
+        }
 
         return
-            submitted
-            ? ActionExecutionStatus::
-            Executed
-            : ActionExecutionStatus::
-            Failed;
+            ActionExecutionStatus::
+            Executed;
     }
 
     bool VirtualControllerService::
@@ -73,6 +89,19 @@ namespace srh::engine::virtual_controller
         std::scoped_lock lock(
             m_mutex
         );
+
+        if (m_client.IsOpen())
+        {
+            //
+            // Release every virtual button and
+            // center all axes/POVs before closing
+            // the user-mode connection.
+            //
+
+            (void)NeutralizeAllLocked();
+        }
+
+        m_reports.clear();
 
         m_client.Close();
     }
@@ -102,15 +131,44 @@ namespace srh::engine::virtual_controller
             m_client.LastError();
     }
 
-    void VirtualControllerService::
-        ClearState()
+    bool VirtualControllerService::
+        ResetAll()
         noexcept
     {
         std::scoped_lock lock(
             m_mutex
         );
 
+        if (m_reports.empty())
+        {
+            return true;
+        }
+
+        //
+        // If the connection disappeared after a
+        // previous successful submission, try to
+        // reconnect so we can send neutral reports.
+        //
+
+        if (!EnsureConnected())
+        {
+            //
+            // Locally forget all old active states.
+            // A future action will therefore send a
+            // fresh report instead of restoring them.
+            //
+
+            m_reports.clear();
+
+            return false;
+        }
+
+        const bool success =
+            NeutralizeAllLocked();
+
         m_reports.clear();
+
+        return success;
     }
 
     bool VirtualControllerService::
@@ -129,6 +187,51 @@ namespace srh::engine::virtual_controller
     }
 
     bool VirtualControllerService::
+        NeutralizeAllLocked()
+        noexcept
+    {
+        if (m_reports.empty())
+        {
+            return true;
+        }
+
+        if (!m_client.IsOpen())
+        {
+            return false;
+        }
+
+        bool success =
+            true;
+
+        for (
+            const auto& [
+                deviceId,
+                currentReport
+            ] :
+            m_reports
+            )
+        {
+            (void)currentReport;
+
+            InputReportV1
+                neutralReport;
+
+            if (
+                !m_client.SubmitReport(
+                    deviceId,
+                    neutralReport
+                )
+                )
+            {
+                success =
+                    false;
+            }
+        }
+
+        return success;
+    }
+
+    bool VirtualControllerService::
         ApplyAction(
             InputReportV1& report,
             const VirtualControllerAction& action
@@ -139,9 +242,9 @@ namespace srh::engine::virtual_controller
         case VirtualControllerActionKind::Button:
         {
             //
-            // Public SRH button numbering:
+            // SRH public numbering:
             //
-            // 1 ... 128
+            // Button 1 ... 128
             //
 
             if (
@@ -196,9 +299,7 @@ namespace srh::engine::virtual_controller
         case VirtualControllerActionKind::Axis:
         {
             //
-            // Public SRH axis numbering:
-            //
-            // 1 ... 8
+            // Axis 1 ... 8
             //
 
             if (
@@ -228,17 +329,18 @@ namespace srh::engine::virtual_controller
         case VirtualControllerActionKind::Pov:
         {
             //
-            // Public SRH POV numbering:
+            // POV 1 ... 4
             //
-            // 1 ... 4
-            //
-            // Canonical value:
+            // SRH canonical value:
             //
             // -1     = centered
             // 0      = north
             // 4500   = north-east
             // 9000   = east
-            // ...
+            // 13500  = south-east
+            // 18000  = south
+            // 22500  = south-west
+            // 27000  = west
             // 31500  = north-west
             //
 
