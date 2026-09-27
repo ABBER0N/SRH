@@ -1,20 +1,12 @@
 #pragma once
 
 #include "Domain/Action.h"
+#include "Domain/ExecutionTypes.h"
 
-#include <cstdint>
 #include <functional>
 
 namespace srh::engine
 {
-    enum class ActionExecutionStatus :
-        std::uint8_t
-    {
-        Executed = 0,
-        Unsupported,
-        Failed
-    };
-
     class ActionExecutor
     {
     public:

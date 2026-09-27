@@ -18,9 +18,7 @@ namespace
     //
     // Windows virtual-key code for F24.
     //
-    // We intentionally use F24 because it normally
-    // has no visible side effect in ordinary software.
-    //
+
     constexpr std::uint32_t
         TestVirtualKey = 0x87;
 
@@ -270,7 +268,7 @@ namespace
         event.timestamp =
             2000;
 
-        const bool submitted =
+        const auto result =
             engine.SubmitInputEvent(
                 event
             );
@@ -279,7 +277,7 @@ namespace
             subscriptionId
         );
 
-        if (!submitted)
+        if (!result.accepted)
         {
             return false;
         }
@@ -316,6 +314,160 @@ namespace
             srh::engine::InputEventType::
             ButtonDown
             )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool TestWindowsExecution(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        srh::engine::InputEvent event;
+
+        event.nodeId =
+            TestNodeId;
+
+        event.controlId =
+            TestControlId;
+
+        event.type =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        event.value =
+            1;
+
+        event.timestamp =
+            3000;
+
+        const auto result =
+            engine.SubmitInputEvent(
+                event
+            );
+
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        if (
+            result.executions[0].status !=
+            srh::engine::ActionExecutionStatus::
+            Executed
+            )
+        {
+            return false;
+        }
+
+        if (!result.AllExecuted())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool TestUnsupportedExecution(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        constexpr srh::engine::ControlId
+            UnsupportedControlId = 20;
+
+        constexpr srh::engine::MappingRuleId
+            UnsupportedRuleId = 2;
+
+        srh::engine::MappingRule rule;
+
+        rule.id =
+            UnsupportedRuleId;
+
+        rule.enabled =
+            true;
+
+        rule.input.nodeId =
+            TestNodeId;
+
+        rule.input.controlId =
+            UnsupportedControlId;
+
+        rule.input.eventType =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            MasterVolumeSet;
+
+        action.value =
+            0.5f;
+
+        rule.action =
+            action;
+
+        engine.AddOrUpdateMappingRule(
+            rule
+        );
+
+        srh::engine::InputEvent event;
+
+        event.nodeId =
+            TestNodeId;
+
+        event.controlId =
+            UnsupportedControlId;
+
+        event.type =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        event.value =
+            1;
+
+        event.timestamp =
+            4000;
+
+        const auto result =
+            engine.SubmitInputEvent(
+                event
+            );
+
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        if (
+            result.executions[0].status !=
+            srh::engine::ActionExecutionStatus::
+            Unsupported
+            )
+        {
+            return false;
+        }
+
+        if (result.AllExecuted())
         {
             return false;
         }
@@ -378,8 +530,35 @@ int main()
     std::cout
         << "PASS: Input pipeline\n";
 
+    if (
+        !TestWindowsExecution(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Windows execution\n";
+
+        return 1;
+    }
+
     std::cout
-        << "PASS: Mapping -> Action -> Windows execution\n";
+        << "PASS: Windows execution\n";
+
+    if (
+        !TestUnsupportedExecution(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Unsupported execution reporting\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Unsupported execution reporting\n";
 
     std::cout
         << "\nAll smoke tests passed.\n";

@@ -2,6 +2,7 @@
 
 #include "Domain/Action.h"
 #include "Domain/DeviceState.h"
+#include "Domain/ExecutionTypes.h"
 #include "Domain/InputEvent.h"
 #include "Domain/InputTypes.h"
 #include "Mapping/MappingRule.h"
@@ -78,7 +79,7 @@ namespace srh::engine
         //
 
         [[nodiscard]]
-        bool SubmitInputEvent(
+        InputProcessingResult SubmitInputEvent(
             const InputEvent& event
         );
 

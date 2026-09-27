@@ -141,10 +141,13 @@ namespace srh::engine
     // Input
     //
 
-    bool SrhEngine::SubmitInputEvent(
-        const InputEvent& event
-    )
+    InputProcessingResult
+        SrhEngine::SubmitInputEvent(
+            const InputEvent& event
+        )
     {
+        InputProcessingResult result;
+
         const bool applied =
             m_impl->inputStateStore.Apply(
                 event
@@ -152,21 +155,41 @@ namespace srh::engine
 
         if (!applied)
         {
-            return false;
+            return result;
         }
+
+        result.accepted =
+            true;
 
         const auto actions =
             m_impl->mappingService.Resolve(
                 event
             );
 
+        result.executions.reserve(
+            actions.size()
+        );
+
         for (
             const auto& action :
             actions
             )
         {
-            (void)m_impl->actionExecutor.Execute(
-                action
+            ActionExecutionResult
+                execution;
+
+            execution.action =
+                action;
+
+            execution.status =
+                m_impl->actionExecutor.Execute(
+                    action
+                );
+
+            result.executions.push_back(
+                std::move(
+                    execution
+                )
             );
         }
 
@@ -174,7 +197,7 @@ namespace srh::engine
             event
         );
 
-        return true;
+        return result;
     }
 
     std::optional<InputControlState>

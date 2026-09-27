@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Domain/Action.h"
-#include "Execution/ActionExecutor.h"
+#include "Domain/ExecutionTypes.h"
 
 namespace srh::engine
 {
