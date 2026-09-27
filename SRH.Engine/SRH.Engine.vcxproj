@@ -156,6 +156,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Devices\DeviceRegistry.h" />
+    <ClInclude Include="Domain\Action.h" />
+    <ClInclude Include="Domain\ActionTypes.h" />
     <ClInclude Include="Domain\DeviceState.h" />
     <ClInclude Include="Domain\InputEvent.h" />
     <ClInclude Include="Domain\InputTypes.h" />
