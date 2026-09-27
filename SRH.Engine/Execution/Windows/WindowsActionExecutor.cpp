@@ -15,6 +15,73 @@ namespace srh::engine
     {
         switch (action.kind)
         {
+            //
+            // Master audio
+            //
+
+        case SystemActionKind::MasterVolumeSet:
+        {
+            return
+                m_audioService.SetMasterVolume(
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::MasterVolumeAdjust:
+        {
+            const auto state =
+                m_audioService.GetMasterState();
+
+            if (!state.has_value())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetMasterVolume(
+                    state->volume +
+                    action.value
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::MasterMuteSet:
+        {
+            return
+                m_audioService.SetMasterMuted(
+                    action.state
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        case SystemActionKind::MasterMuteToggle:
+        {
+            const auto state =
+                m_audioService.GetMasterState();
+
+            if (!state.has_value())
+            {
+                return
+                    ActionExecutionStatus::Failed;
+            }
+
+            return
+                m_audioService.SetMasterMuted(
+                    !state->muted
+                )
+                ? ActionExecutionStatus::Executed
+                : ActionExecutionStatus::Failed;
+        }
+
+        //
+        // Keyboard
+        //
+
         case SystemActionKind::KeyboardDown:
             return
                 SendKeyDown(
@@ -38,6 +105,10 @@ namespace srh::engine
                 )
                 ? ActionExecutionStatus::Executed
                 : ActionExecutionStatus::Failed;
+
+            //
+            // Media
+            //
 
         case SystemActionKind::MediaPlayPause:
             return
@@ -65,7 +136,8 @@ namespace srh::engine
 
         default:
             return
-                ActionExecutionStatus::Unsupported;
+                ActionExecutionStatus::
+                Unsupported;
         }
     }
 

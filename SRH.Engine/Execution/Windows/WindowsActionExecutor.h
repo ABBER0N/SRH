@@ -2,6 +2,7 @@
 
 #include "Domain/Action.h"
 #include "Domain/ExecutionTypes.h"
+#include "Execution/Windows/Audio/AudioService.h"
 
 namespace srh::engine
 {
@@ -38,5 +39,8 @@ namespace srh::engine
         static bool SendKeyPress(
             std::uint32_t virtualKeyCode
         );
+
+        AudioService
+            m_audioService;
     };
 }

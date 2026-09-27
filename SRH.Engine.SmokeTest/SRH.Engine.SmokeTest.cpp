@@ -15,10 +15,6 @@ namespace
     constexpr srh::engine::MappingRuleId
         TestMappingRuleId = 1;
 
-    //
-    // Windows virtual-key code for F24.
-    //
-
     constexpr std::uint32_t
         TestVirtualKey = 0x87;
 
@@ -91,15 +87,9 @@ namespace
             return false;
         }
 
-        if (
-            snapshot.nodes[0].nodeId !=
-            TestNodeId
-            )
-        {
-            return false;
-        }
-
-        return true;
+        return
+            snapshot.nodes[0].nodeId ==
+            TestNodeId;
     }
 
     bool TestMapping(
@@ -194,24 +184,12 @@ namespace
             return false;
         }
 
-        if (
-            systemAction->kind !=
+        return
+            systemAction->kind ==
             srh::engine::SystemActionKind::
-            KeyboardPress
-            )
-        {
-            return false;
-        }
-
-        if (
-            systemAction->code !=
-            TestVirtualKey
-            )
-        {
-            return false;
-        }
-
-        return true;
+            KeyboardPress &&
+            systemAction->code ==
+            TestVirtualKey;
     }
 
     bool TestInputPipeline(
@@ -301,24 +279,11 @@ namespace
             return false;
         }
 
-        if (
-            state->value !=
-            1
-            )
-        {
-            return false;
-        }
-
-        if (
-            state->type !=
+        return
+            state->value == 1 &&
+            state->type ==
             srh::engine::InputEventType::
-            ButtonDown
-            )
-        {
-            return false;
-        }
-
-        return true;
+            ButtonDown;
     }
 
     bool TestWindowsExecution(
@@ -361,37 +326,28 @@ namespace
             return false;
         }
 
-        if (
-            result.executions[0].status !=
-            srh::engine::ActionExecutionStatus::
-            Executed
-            )
-        {
-            return false;
-        }
-
-        if (!result.AllExecuted())
-        {
-            return false;
-        }
-
-        return true;
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Executed &&
+            result.AllExecuted();
     }
 
-    bool TestUnsupportedExecution(
+    bool TestMasterAudioExecution(
         srh::engine::SrhEngine& engine
     )
     {
         constexpr srh::engine::ControlId
-            UnsupportedControlId = 20;
+            AudioControlId = 20;
 
         constexpr srh::engine::MappingRuleId
-            UnsupportedRuleId = 2;
+            AudioRuleId = 2;
 
         srh::engine::MappingRule rule;
 
         rule.id =
-            UnsupportedRuleId;
+            AudioRuleId;
 
         rule.enabled =
             true;
@@ -400,7 +356,7 @@ namespace
             TestNodeId;
 
         rule.input.controlId =
-            UnsupportedControlId;
+            AudioControlId;
 
         rule.input.eventType =
             srh::engine::InputEventType::
@@ -410,10 +366,16 @@ namespace
 
         action.kind =
             srh::engine::SystemActionKind::
-            MasterVolumeSet;
+            MasterVolumeAdjust;
+
+        //
+        // Safe no-op:
+        // read current master volume and write
+        // the same value back.
+        //
 
         action.value =
-            0.5f;
+            0.0f;
 
         rule.action =
             action;
@@ -428,7 +390,7 @@ namespace
             TestNodeId;
 
         event.controlId =
-            UnsupportedControlId;
+            AudioControlId;
 
         event.type =
             srh::engine::InputEventType::
@@ -458,21 +420,103 @@ namespace
             return false;
         }
 
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Executed &&
+            result.AllExecuted();
+    }
+
+    bool TestUnsupportedExecution(
+        srh::engine::SrhEngine& engine
+    )
+    {
+        constexpr srh::engine::ControlId
+            UnsupportedControlId = 21;
+
+        constexpr srh::engine::MappingRuleId
+            UnsupportedRuleId = 3;
+
+        srh::engine::MappingRule rule;
+
+        rule.id =
+            UnsupportedRuleId;
+
+        rule.enabled =
+            true;
+
+        rule.input.nodeId =
+            TestNodeId;
+
+        rule.input.controlId =
+            UnsupportedControlId;
+
+        rule.input.eventType =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        srh::engine::SystemAction action;
+
+        action.kind =
+            srh::engine::SystemActionKind::
+            EndpointVolumeSet;
+
+        action.targetId =
+            "not-yet-implemented";
+
+        action.value =
+            0.5f;
+
+        rule.action =
+            action;
+
+        engine.AddOrUpdateMappingRule(
+            rule
+        );
+
+        srh::engine::InputEvent event;
+
+        event.nodeId =
+            TestNodeId;
+
+        event.controlId =
+            UnsupportedControlId;
+
+        event.type =
+            srh::engine::InputEventType::
+            ButtonDown;
+
+        event.value =
+            1;
+
+        event.timestamp =
+            5000;
+
+        const auto result =
+            engine.SubmitInputEvent(
+                event
+            );
+
+        if (!result.accepted)
+        {
+            return false;
+        }
+
         if (
-            result.executions[0].status !=
-            srh::engine::ActionExecutionStatus::
-            Unsupported
+            result.executions.size() !=
+            1
             )
         {
             return false;
         }
 
-        if (result.AllExecuted())
-        {
-            return false;
-        }
-
-        return true;
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Unsupported &&
+            !result.AllExecuted();
     }
 }
 
@@ -544,6 +588,21 @@ int main()
 
     std::cout
         << "PASS: Windows execution\n";
+
+    if (
+        !TestMasterAudioExecution(
+            engine
+        )
+        )
+    {
+        std::cout
+            << "FAIL: Master audio execution\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Master audio execution\n";
 
     if (
         !TestUnsupportedExecution(
