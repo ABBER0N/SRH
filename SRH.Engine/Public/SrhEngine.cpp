@@ -3,6 +3,8 @@
 #include "Public/SrhEngine.h"
 
 #include "Devices/DeviceRegistry.h"
+#include "Execution/ActionExecutor.h"
+#include "Execution/Windows/WindowsActionExecutor.h"
 #include "Input/InputEventBus.h"
 #include "Input/InputStateStore.h"
 #include "Mapping/MappingService.h"
@@ -14,6 +16,21 @@ namespace srh::engine
     class SrhEngine::Impl
     {
     public:
+        Impl()
+        {
+            actionExecutor.SetSystemHandler(
+                [this](
+                    const SystemAction& action
+                    )
+                {
+                    return
+                        windowsActionExecutor.Execute(
+                            action
+                        );
+                }
+            );
+        }
+
         DeviceRegistry
             deviceRegistry;
 
@@ -25,6 +42,12 @@ namespace srh::engine
 
         MappingService
             mappingService;
+
+        WindowsActionExecutor
+            windowsActionExecutor;
+
+        ActionExecutor
+            actionExecutor;
     };
 
     SrhEngine::SrhEngine()
@@ -130,6 +153,21 @@ namespace srh::engine
         if (!applied)
         {
             return false;
+        }
+
+        const auto actions =
+            m_impl->mappingService.Resolve(
+                event
+            );
+
+        for (
+            const auto& action :
+            actions
+            )
+        {
+            (void)m_impl->actionExecutor.Execute(
+                action
+            );
         }
 
         m_impl->inputEventBus.Publish(

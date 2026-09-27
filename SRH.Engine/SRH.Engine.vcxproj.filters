@@ -31,6 +31,9 @@
     <Filter Include="Execution">
       <UniqueIdentifier>{c5e25eb1-c9c3-4a77-9651-19e3ba865b9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Execution\Windows">
+      <UniqueIdentifier>{dbf9d6d2-f2a7-48e0-975f-2bca6c658a4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -75,6 +78,9 @@
     <ClInclude Include="Execution\ActionExecutor.h">
       <Filter>Execution</Filter>
     </ClInclude>
+    <ClInclude Include="Execution\Windows\WindowsActionExecutor.h">
+      <Filter>Execution\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -97,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="Execution\ActionExecutor.cpp">
       <Filter>Execution</Filter>
+    </ClCompile>
+    <ClCompile Include="Execution\Windows\WindowsActionExecutor.cpp">
+      <Filter>Execution\Windows</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
