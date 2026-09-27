@@ -164,6 +164,8 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Input\InputEventBus.h" />
     <ClInclude Include="Input\InputStateStore.h" />
+    <ClInclude Include="Mapping\MappingRule.h" />
+    <ClInclude Include="Mapping\MappingService.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Public\SrhEngine.h" />
   </ItemGroup>
@@ -171,6 +173,7 @@
     <ClCompile Include="Devices\DeviceRegistry.cpp" />
     <ClCompile Include="Input\InputEventBus.cpp" />
     <ClCompile Include="Input\InputStateStore.cpp" />
+    <ClCompile Include="Mapping\MappingService.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

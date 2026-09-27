@@ -25,6 +25,9 @@
     <Filter Include="Input">
       <UniqueIdentifier>{bbb7a5bf-e0f6-4459-bf42-708df348b8d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Mapping">
+      <UniqueIdentifier>{d39f0e9d-0234-4375-b7ec-7ce03c3942ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -60,6 +63,12 @@
     <ClInclude Include="Domain\ActionTypes.h">
       <Filter>Domain</Filter>
     </ClInclude>
+    <ClInclude Include="Mapping\MappingRule.h">
+      <Filter>Mapping</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapping\MappingService.h">
+      <Filter>Mapping</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -76,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="Input\InputEventBus.cpp">
       <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapping\MappingService.cpp">
+      <Filter>Mapping</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

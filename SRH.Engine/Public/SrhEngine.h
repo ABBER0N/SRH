@@ -1,13 +1,16 @@
 #pragma once
 
+#include "Domain/Action.h"
 #include "Domain/DeviceState.h"
 #include "Domain/InputEvent.h"
 #include "Domain/InputTypes.h"
+#include "Mapping/MappingRule.h"
 
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace srh::engine
 {
@@ -103,6 +106,40 @@ namespace srh::engine
         void UnsubscribeInput(
             InputSubscriptionId subscriptionId
         );
+
+        //
+        // Mapping
+        //
+
+        void SetMappingRules(
+            std::vector<MappingRule> rules
+        );
+
+        void AddOrUpdateMappingRule(
+            MappingRule rule
+        );
+
+        void RemoveMappingRule(
+            MappingRuleId ruleId
+        );
+
+        void ClearMappingRules();
+
+        [[nodiscard]]
+        std::optional<MappingRule>
+            FindMappingRule(
+                MappingRuleId ruleId
+            ) const;
+
+        [[nodiscard]]
+        std::vector<MappingRule>
+            GetMappingRules() const;
+
+        [[nodiscard]]
+        std::vector<Action>
+            ResolveActions(
+                const InputEvent& event
+            ) const;
 
     private:
         class Impl;

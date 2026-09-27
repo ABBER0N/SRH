@@ -5,6 +5,7 @@
 #include "Devices/DeviceRegistry.h"
 #include "Input/InputEventBus.h"
 #include "Input/InputStateStore.h"
+#include "Mapping/MappingService.h"
 
 #include <utility>
 
@@ -21,6 +22,9 @@ namespace srh::engine
 
         InputEventBus
             inputEventBus;
+
+        MappingService
+            mappingService;
     };
 
     SrhEngine::SrhEngine()
@@ -184,5 +188,70 @@ namespace srh::engine
         m_impl->inputEventBus.Unsubscribe(
             subscriptionId
         );
+    }
+
+    //
+    // Mapping
+    //
+
+    void SrhEngine::SetMappingRules(
+        std::vector<MappingRule> rules
+    )
+    {
+        m_impl->mappingService.SetRules(
+            std::move(rules)
+        );
+    }
+
+    void SrhEngine::AddOrUpdateMappingRule(
+        MappingRule rule
+    )
+    {
+        m_impl->mappingService.AddOrUpdateRule(
+            std::move(rule)
+        );
+    }
+
+    void SrhEngine::RemoveMappingRule(
+        const MappingRuleId ruleId
+    )
+    {
+        m_impl->mappingService.RemoveRule(
+            ruleId
+        );
+    }
+
+    void SrhEngine::ClearMappingRules()
+    {
+        m_impl->mappingService.Clear();
+    }
+
+    std::optional<MappingRule>
+        SrhEngine::FindMappingRule(
+            const MappingRuleId ruleId
+        ) const
+    {
+        return
+            m_impl->mappingService.FindRule(
+                ruleId
+            );
+    }
+
+    std::vector<MappingRule>
+        SrhEngine::GetMappingRules() const
+    {
+        return
+            m_impl->mappingService.GetRules();
+    }
+
+    std::vector<Action>
+        SrhEngine::ResolveActions(
+            const InputEvent& event
+        ) const
+    {
+        return
+            m_impl->mappingService.Resolve(
+                event
+            );
     }
 }
