@@ -162,6 +162,9 @@
     <ClInclude Include="Hub\Transport\HubSerialTransport.h">
       <Filter>Hub\Transport</Filter>
     </ClInclude>
+    <ClInclude Include="Hub\HubConnectionService.h">
+      <Filter>Hub</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -220,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="Hub\Transport\HubSerialTransport.cpp">
       <Filter>Hub\Transport</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub\HubConnectionService.cpp">
+      <Filter>Hub</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

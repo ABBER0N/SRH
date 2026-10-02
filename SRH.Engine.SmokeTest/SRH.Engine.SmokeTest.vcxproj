@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleUtf8.cpp" />
+    <ClCompile Include="HubConnectionSmokeTest.cpp" />
     <ClCompile Include="HubIngressSmokeTest.cpp" />
     <ClCompile Include="HubMessageSmokeTest.cpp" />
     <ClCompile Include="HubProtocolSmokeTest.cpp" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtf8.h" />
+    <ClInclude Include="HubConnectionSmokeTest.h" />
     <ClInclude Include="HubIngressSmokeTest.h" />
     <ClInclude Include="HubMessageSmokeTest.h" />
     <ClInclude Include="HubProtocolSmokeTest.h" />

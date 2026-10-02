@@ -1577,10 +1577,10 @@ int main()
         << "PASS: Hub ingress pipeline\n";
 
     //
-    // Windows USB CDC / COM transport API.
+    // Low-level Windows USB CDC / COM transport.
     //
-    // This test is fully offline and does not
-    // require an ESP32-S3 or a real COM port.
+    // Offline test only. No real COM device is
+    // opened.
     //
 
     if (
@@ -1596,6 +1596,28 @@ int main()
 
     std::cout
         << "PASS: Hub serial transport\n";
+
+    //
+    // Connection/session worker.
+    //
+    // Offline test only. It verifies lifecycle,
+    // outgoing validation and failed connection
+    // handling without requiring ESP32-S3.
+    //
+
+    if (
+        !srh::smoketest::
+        RunHubConnectionSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Hub connection service\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Hub connection service\n";
 
     if (
         !TestDeviceRegistry(
