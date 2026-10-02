@@ -93,14 +93,16 @@ namespace
             ButtonDown;
 
         rule.input.valueCondition =
-            srh::engine::InputValueCondition::
+            srh::engine::
+            InputValueCondition::
             Any;
 
         rule.action =
             std::move(action);
 
         rule.valueMode =
-            srh::engine::ActionValueMode::
+            srh::engine::
+            ActionValueMode::
             Fixed;
 
         engine.AddOrUpdateMappingRule(
@@ -115,6 +117,7 @@ namespace
         const srh::engine::InputEventType eventType,
         const srh::engine::
         VirtualControllerActionKind actionKind,
+        const srh::engine::VirtualDeviceId deviceId,
         const srh::engine::ControlId outputControlId,
         const std::int32_t outputValue
     )
@@ -148,7 +151,7 @@ namespace
             actionKind;
 
         action.deviceId =
-            TestVirtualDeviceId;
+            deviceId;
 
         action.controlId =
             outputControlId;
@@ -244,6 +247,32 @@ namespace
             ActionExecutionStatus::
             Executed &&
             result.AllExecuted();
+    }
+
+    bool IsSingleExecutionFailed(
+        const srh::engine::
+        InputProcessingResult& result
+    )
+    {
+        if (!result.accepted)
+        {
+            return false;
+        }
+
+        if (
+            result.executions.size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        return
+            result.executions[0].status ==
+            srh::engine::
+            ActionExecutionStatus::
+            Failed &&
+            !result.AllExecuted();
     }
 
     std::optional<srh::engine::AudioEndpointInfo>
@@ -738,24 +767,10 @@ namespace
                 5000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Failed;
+            IsSingleExecutionFailed(
+                result
+            );
     }
 
     bool TestEndpointEnumeration(
@@ -1030,24 +1045,10 @@ namespace
                 8000
             );
 
-        if (!result.accepted)
-        {
-            return false;
-        }
-
-        if (
-            result.executions.size() !=
-            1
-            )
-        {
-            return false;
-        }
-
         return
-            result.executions[0].status ==
-            srh::engine::
-            ActionExecutionStatus::
-            Failed;
+            IsSingleExecutionFailed(
+                result
+            );
     }
 
     bool TestMediaState(
@@ -1129,11 +1130,6 @@ namespace
         std::cout
             << "INFO: Virtual controller driver connected\n";
 
-        //
-        // Input controls used only to trigger
-        // virtual-controller actions.
-        //
-
         constexpr srh::engine::ControlId
             ButtonInputControl = 100;
 
@@ -1179,13 +1175,6 @@ namespace
         constexpr srh::engine::MappingRuleId
             PovCenterRule = 107;
 
-        //
-        // Virtual Button 1:
-        //
-        // physical ButtonDown -> virtual down
-        // physical ButtonUp   -> virtual up
-        //
-
         AddVirtualControllerRule(
             engine,
             ButtonDownRule,
@@ -1196,6 +1185,7 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Button,
+            TestVirtualDeviceId,
             1,
             1
         );
@@ -1210,17 +1200,10 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Button,
+            TestVirtualDeviceId,
             1,
             0
         );
-
-        //
-        // Virtual Axis 1:
-        //
-        // +16384
-        // -16384
-        // 0
-        //
 
         AddVirtualControllerRule(
             engine,
@@ -1232,6 +1215,7 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Axis,
+            TestVirtualDeviceId,
             1,
             16384
         );
@@ -1246,6 +1230,7 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Axis,
+            TestVirtualDeviceId,
             1,
             -16384
         );
@@ -1260,17 +1245,10 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Axis,
+            TestVirtualDeviceId,
             1,
             0
         );
-
-        //
-        // Virtual POV 1:
-        //
-        // 0     = North
-        // 9000  = East
-        // -1    = Centered
-        //
 
         AddVirtualControllerRule(
             engine,
@@ -1282,6 +1260,7 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Pov,
+            TestVirtualDeviceId,
             1,
             0
         );
@@ -1296,6 +1275,7 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Pov,
+            TestVirtualDeviceId,
             1,
             9000
         );
@@ -1310,13 +1290,10 @@ namespace
             srh::engine::
             VirtualControllerActionKind::
             Pov,
+            TestVirtualDeviceId,
             1,
             -1
         );
-
-        //
-        // Button 1 down.
-        //
 
         auto result =
             SubmitInput(
@@ -1341,10 +1318,6 @@ namespace
         std::cout
             << "INFO: Virtual Button 1 down submitted\n";
 
-        //
-        // Button 1 up.
-        //
-
         result =
             SubmitInput(
                 engine,
@@ -1368,10 +1341,6 @@ namespace
         std::cout
             << "INFO: Virtual Button 1 up submitted\n";
 
-        //
-        // Axis +16384.
-        //
-
         result =
             SubmitButton(
                 engine,
@@ -1390,10 +1359,6 @@ namespace
 
         std::cout
             << "INFO: Virtual Axis 1 = +16384 submitted\n";
-
-        //
-        // Axis -16384.
-        //
 
         result =
             SubmitButton(
@@ -1414,10 +1379,6 @@ namespace
         std::cout
             << "INFO: Virtual Axis 1 = -16384 submitted\n";
 
-        //
-        // Axis center.
-        //
-
         result =
             SubmitButton(
                 engine,
@@ -1436,10 +1397,6 @@ namespace
 
         std::cout
             << "INFO: Virtual Axis 1 = 0 submitted\n";
-
-        //
-        // POV North.
-        //
 
         result =
             SubmitButton(
@@ -1460,10 +1417,6 @@ namespace
         std::cout
             << "INFO: Virtual POV 1 = North submitted\n";
 
-        //
-        // POV East.
-        //
-
         result =
             SubmitButton(
                 engine,
@@ -1482,10 +1435,6 @@ namespace
 
         std::cout
             << "INFO: Virtual POV 1 = East submitted\n";
-
-        //
-        // POV centered.
-        //
 
         result =
             SubmitButton(
@@ -1506,10 +1455,6 @@ namespace
         std::cout
             << "INFO: Virtual POV 1 = Centered submitted\n";
 
-        //
-        // Explicit final neutral report.
-        //
-
         if (
             !engine
             .ResetVirtualControllers()
@@ -1518,8 +1463,442 @@ namespace
             return false;
         }
 
+        const auto controller =
+            engine.FindVirtualController(
+                TestVirtualDeviceId
+            );
+
+        if (
+            !controller.has_value() ||
+            controller->active
+            )
+        {
+            return false;
+        }
+
         std::cout
             << "INFO: Virtual controller neutral state submitted\n";
+
+        return true;
+    }
+
+    bool TestVirtualControllerLifecycle()
+    {
+        srh::engine::SrhEngine
+            engine;
+
+        VirtualControllerSessionGuard
+            sessionGuard(
+                engine
+            );
+
+        //
+        // Default DeviceId 0 must exist.
+        //
+
+        auto controller =
+            engine.FindVirtualController(
+                0
+            );
+
+        if (!controller.has_value())
+        {
+            return false;
+        }
+
+        if (
+            controller->deviceId !=
+            0 ||
+            controller->name !=
+            "Virtual Controller 1" ||
+            !controller->enabled ||
+            controller->active
+            )
+        {
+            return false;
+        }
+
+        //
+        // Add a second configured controller.
+        //
+        // active=true is deliberately supplied here.
+        // The Engine must ignore runtime state coming
+        // from configuration and force it to false.
+        //
+
+        srh::engine::VirtualControllerState
+            secondaryController;
+
+        secondaryController.deviceId =
+            1;
+
+        secondaryController.name =
+            "Виртуальный контроллер 2";
+
+        secondaryController.enabled =
+            true;
+
+        secondaryController.active =
+            true;
+
+        engine.AddOrUpdateVirtualController(
+            secondaryController
+        );
+
+        const auto controllers =
+            engine.GetVirtualControllers();
+
+        if (
+            controllers.size() !=
+            2
+            )
+        {
+            return false;
+        }
+
+        if (
+            controllers[0].deviceId !=
+            0 ||
+            controllers[1].deviceId !=
+            1
+            )
+        {
+            return false;
+        }
+
+        if (
+            controllers[1].name !=
+            "Виртуальный контроллер 2"
+            )
+        {
+            return false;
+        }
+
+        if (
+            controllers[1].active
+            )
+        {
+            return false;
+        }
+
+        //
+        // Unknown DeviceId must be rejected by
+        // Engine registry before driver execution.
+        //
+
+        constexpr srh::engine::VirtualDeviceId
+            UnknownDeviceId = 60000;
+
+        constexpr srh::engine::ControlId
+            UnknownDeviceInput = 200;
+
+        constexpr srh::engine::MappingRuleId
+            UnknownDeviceRule = 200;
+
+        AddVirtualControllerRule(
+            engine,
+            UnknownDeviceRule,
+            UnknownDeviceInput,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Button,
+            UnknownDeviceId,
+            1,
+            1
+        );
+
+        auto result =
+            SubmitButton(
+                engine,
+                UnknownDeviceInput,
+                20000
+            );
+
+        if (
+            !IsSingleExecutionFailed(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        //
+        // Connect once for the real DeviceId 0
+        // lifecycle test.
+        //
+
+        if (
+            !engine
+            .ConnectVirtualControllerDriver()
+            )
+        {
+            std::cout
+                << "INFO: Lifecycle driver error: "
+                << engine
+                .GetVirtualControllerDriverError()
+                << '\n';
+
+            return false;
+        }
+
+        constexpr srh::engine::ControlId
+            DeviceInput = 201;
+
+        constexpr srh::engine::MappingRuleId
+            DeviceRule = 201;
+
+        AddVirtualControllerRule(
+            engine,
+            DeviceRule,
+            DeviceInput,
+            srh::engine::
+            InputEventType::
+            ButtonDown,
+            srh::engine::
+            VirtualControllerActionKind::
+            Button,
+            0,
+            2,
+            1
+        );
+
+        //
+        // Enabled controller executes and becomes
+        // active.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                DeviceInput,
+                20001
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        controller =
+            engine.FindVirtualController(
+                0
+            );
+
+        if (
+            !controller.has_value() ||
+            !controller->enabled ||
+            !controller->active
+            )
+        {
+            return false;
+        }
+
+        //
+        // Disable must neutralize runtime state and
+        // clear active.
+        //
+
+        if (
+            !engine
+            .SetVirtualControllerEnabled(
+                0,
+                false
+            )
+            )
+        {
+            return false;
+        }
+
+        controller =
+            engine.FindVirtualController(
+                0
+            );
+
+        if (
+            !controller.has_value() ||
+            controller->enabled ||
+            controller->active
+            )
+        {
+            return false;
+        }
+
+        //
+        // Disabled controller is still configured,
+        // but execution must fail.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                DeviceInput,
+                20002
+            );
+
+        if (
+            !IsSingleExecutionFailed(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        //
+        // Re-enable. It must remain inactive until
+        // another successful report is submitted.
+        //
+
+        if (
+            !engine
+            .SetVirtualControllerEnabled(
+                0,
+                true
+            )
+            )
+        {
+            return false;
+        }
+
+        controller =
+            engine.FindVirtualController(
+                0
+            );
+
+        if (
+            !controller.has_value() ||
+            !controller->enabled ||
+            controller->active
+            )
+        {
+            return false;
+        }
+
+        result =
+            SubmitButton(
+                engine,
+                DeviceInput,
+                20003
+            );
+
+        if (
+            !IsSingleExecutionSuccessful(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        controller =
+            engine.FindVirtualController(
+                0
+            );
+
+        if (
+            !controller.has_value() ||
+            !controller->active
+            )
+        {
+            return false;
+        }
+
+        //
+        // Remove must neutralize DeviceId 0 and
+        // remove its configuration.
+        //
+
+        if (
+            !engine
+            .RemoveVirtualController(
+                0
+            )
+            )
+        {
+            return false;
+        }
+
+        if (
+            engine
+            .FindVirtualController(
+                0
+            )
+            .has_value()
+            )
+        {
+            return false;
+        }
+
+        //
+        // The existing mapping still resolves,
+        // but registry validation must now reject
+        // its removed DeviceId.
+        //
+
+        result =
+            SubmitButton(
+                engine,
+                DeviceInput,
+                20004
+            );
+
+        if (
+            !IsSingleExecutionFailed(
+                result
+            )
+            )
+        {
+            return false;
+        }
+
+        //
+        // DeviceId 1 was configuration-only and
+        // must still exist and remain inactive.
+        //
+
+        controller =
+            engine.FindVirtualController(
+                1
+            );
+
+        if (
+            !controller.has_value() ||
+            !controller->enabled ||
+            controller->active
+            )
+        {
+            return false;
+        }
+
+        if (
+            !engine
+            .RemoveVirtualController(
+                1
+            )
+            )
+        {
+            return false;
+        }
+
+        if (
+            !engine
+            .GetVirtualControllers()
+            .empty()
+            )
+        {
+            return false;
+        }
+
+        std::cout
+            << "INFO: Virtual controller registry lifecycle verified\n";
 
         return true;
     }
@@ -1555,7 +1934,7 @@ namespace
             SubmitButton(
                 engine,
                 ControlId,
-                11000
+                30000
             );
 
         if (!result.accepted)
@@ -1812,6 +2191,19 @@ int main()
 
     std::cout
         << "PASS: Virtual controller execution\n";
+
+    if (
+        !TestVirtualControllerLifecycle()
+        )
+    {
+        std::cout
+            << "FAIL: Virtual controller lifecycle\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Virtual controller lifecycle\n";
 
     if (
         !TestUnsupportedExecution(
