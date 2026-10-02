@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Devices\DeviceRegistry.h" />
+    <ClInclude Include="Devices\VirtualController\VirtualControllerRegistry.h" />
     <ClInclude Include="Domain\Action.h" />
     <ClInclude Include="Domain\ActionTypes.h" />
     <ClInclude Include="Domain\DeviceState.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="Domain\InputEvent.h" />
     <ClInclude Include="Domain\InputTypes.h" />
     <ClInclude Include="Domain\MediaState.h" />
+    <ClInclude Include="Domain\VirtualControllerState.h" />
     <ClInclude Include="Execution\ActionExecutor.h" />
     <ClInclude Include="Execution\VirtualController\VirtualControllerService.h" />
     <ClInclude Include="Execution\VirtualController\VirtualDeviceClient.h" />
@@ -187,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Devices\DeviceRegistry.cpp" />
+    <ClCompile Include="Devices\VirtualController\VirtualControllerRegistry.cpp" />
     <ClCompile Include="Execution\ActionExecutor.cpp" />
     <ClCompile Include="Execution\VirtualController\VirtualControllerService.cpp" />
     <ClCompile Include="Execution\VirtualController\VirtualDeviceClient.cpp" />

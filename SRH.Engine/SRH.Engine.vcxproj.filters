@@ -46,6 +46,9 @@
     <Filter Include="Execution\VirtualController">
       <UniqueIdentifier>{2f55658f-5a33-4a20-a694-ec1ff82da84b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\VirtualController">
+      <UniqueIdentifier>{344d8833-994d-4a78-9ce5-f1306f149f9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -123,6 +126,12 @@
     <ClInclude Include="Execution\VirtualController\VirtualControllerService.h">
       <Filter>Execution\VirtualController</Filter>
     </ClInclude>
+    <ClInclude Include="Domain\VirtualControllerState.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Devices\VirtualController\VirtualControllerRegistry.h">
+      <Filter>Devices\VirtualController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -166,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="Execution\VirtualController\VirtualControllerService.cpp">
       <Filter>Execution\VirtualController</Filter>
+    </ClCompile>
+    <ClCompile Include="Devices\VirtualController\VirtualControllerRegistry.cpp">
+      <Filter>Devices\VirtualController</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
