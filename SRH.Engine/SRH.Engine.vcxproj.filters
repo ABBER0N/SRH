@@ -183,6 +183,21 @@
     <ClInclude Include="Game\Domain\TelemetryState.h">
       <Filter>Game\Domain</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryAggregateState.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryNativeState.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryRealtimeState.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetrySessionState.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryStaticState.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

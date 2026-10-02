@@ -1,10 +1,12 @@
 #include "TelemetryDomainSmokeTest.h"
 
+#include "Game/Domain/TelemetryAggregateState.h"
 #include "Game/Domain/TelemetrySnapshot.h"
 
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace
 {
@@ -165,8 +167,10 @@ namespace
         }
 
         //
-        // Zero is a real value and must not mean
-        // "unsupported".
+        // Zero is a valid value.
+        //
+        // It must never implicitly mean
+        // "unsupported" or "unavailable".
         //
 
         if (
@@ -402,6 +406,283 @@ namespace
             .fields[1]
             .supported;
     }
+
+    bool TestTelemetryStatePartitioning()
+    {
+        TelemetryState
+            state;
+
+        state.epoch =
+            7;
+
+        //
+        // Static update.
+        //
+
+        state.staticState.generation =
+            2;
+
+        state.staticState
+            .game
+            .providerId =
+            "acc";
+
+        state.staticState
+            .game
+            .gameName =
+            "Assetto Corsa Competizione";
+
+        state.staticState
+            .track
+            .name =
+            "Monza";
+
+        state.staticState
+            .playerVehicle
+            .className =
+            "GT3";
+
+        //
+        // Session update.
+        //
+
+        state.sessionState.generation =
+            31;
+
+        state.sessionState
+            .session
+            .type =
+            SessionType::Race;
+
+        state.sessionState
+            .session
+            .playerOverallPosition
+            .SetValue(
+                8
+            );
+
+        ParticipantState
+            participant;
+
+        participant.participantId =
+            1001;
+
+        participant
+            .overallPosition
+            .SetValue(
+                1
+            );
+
+        participant
+            .normalizedTrackPosition
+            .SetValue(
+                0.64
+            );
+
+        participant.positionSource =
+            ParticipantPositionSource::
+            NormalizedTrackPosition;
+
+        state.sessionState
+            .participants
+            .push_back(
+                std::move(
+                    participant
+                )
+            );
+
+        //
+        // Realtime updates may advance many times
+        // without changing Static or Session
+        // generations.
+        //
+
+        state.realtimeState.generation =
+            14820;
+
+        state.realtimeState
+            .powertrain
+            .engineRpm
+            .SetValue(
+                6942.0
+            );
+
+        state.realtimeState
+            .motion
+            .speedMps
+            .SetValue(
+                61.5
+            );
+
+        state.realtimeState
+            .controls
+            .throttleInput01
+            .SetValue(
+                0.91
+            );
+
+        //
+        // Native channels have their own update
+        // generation and therefore do not force
+        // normalized generations to change.
+        //
+
+        state.nativeState.generation =
+            21000;
+
+        NativeChannel
+            rpmChannel;
+
+        rpmChannel.metadata.name =
+            "ACC.Physics.rpms";
+
+        rpmChannel.metadata.type =
+            NativeChannelType::
+            Int32;
+
+        rpmChannel.metadata.elementCount =
+            1;
+
+        rpmChannel.metadata.unit =
+            "rpm";
+
+        rpmChannel.valid =
+            true;
+
+        rpmChannel.value =
+            std::int32_t{
+                6942
+        };
+
+        state.nativeState
+            .channels
+            .channels
+            .push_back(
+                std::move(
+                    rpmChannel
+                )
+            );
+
+        if (
+            state.epoch !=
+            7
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.staticState.generation !=
+            2
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.sessionState.generation !=
+            31
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.realtimeState.generation !=
+            14820
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.nativeState.generation !=
+            21000
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.staticState
+            .track
+            .name !=
+            "Monza"
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.sessionState
+            .participants
+            .size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        if (
+            !state.realtimeState
+            .powertrain
+            .engineRpm
+            .HasValue()
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.realtimeState
+            .powertrain
+            .engineRpm
+            .value !=
+            6942.0
+            )
+        {
+            return false;
+        }
+
+        if (
+            state.nativeState
+            .channels
+            .channels
+            .size() !=
+            1
+            )
+        {
+            return false;
+        }
+
+        const auto& nativeChannel =
+            state.nativeState
+            .channels
+            .channels
+            .front();
+
+        if (
+            nativeChannel.metadata.name !=
+            "ACC.Physics.rpms"
+            )
+        {
+            return false;
+        }
+
+        const auto* nativeRpm =
+            std::get_if<std::int32_t>(
+                &nativeChannel.value
+            );
+
+        if (nativeRpm == nullptr)
+        {
+            return false;
+        }
+
+        return
+            *nativeRpm ==
+            6942;
+    }
 }
 
 namespace srh::smoketest
@@ -447,6 +728,17 @@ namespace srh::smoketest
 
             return false;
         }
+
+        if (!TestTelemetryStatePartitioning())
+        {
+            std::cout
+                << "FAIL: Telemetry state partitioning\n";
+
+            return false;
+        }
+
+        std::cout
+            << "INFO: Telemetry state partitioning verified\n";
 
         std::cout
             << "INFO: Telemetry domain model verified\n";

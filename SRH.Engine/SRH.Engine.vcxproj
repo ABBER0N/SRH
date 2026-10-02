@@ -181,10 +181,15 @@
     <ClInclude Include="Execution\Windows\Text\Utf8.h" />
     <ClInclude Include="Execution\Windows\WindowsActionExecutor.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Game\Domain\TelemetryAggregateState.h" />
     <ClInclude Include="Game\Domain\TelemetryCommon.h" />
     <ClInclude Include="Game\Domain\TelemetryNativeChannel.h" />
+    <ClInclude Include="Game\Domain\TelemetryNativeState.h" />
+    <ClInclude Include="Game\Domain\TelemetryRealtimeState.h" />
+    <ClInclude Include="Game\Domain\TelemetrySessionState.h" />
     <ClInclude Include="Game\Domain\TelemetrySnapshot.h" />
     <ClInclude Include="Game\Domain\TelemetryState.h" />
+    <ClInclude Include="Game\Domain\TelemetryStaticState.h" />
     <ClInclude Include="Hub\HubConnectionService.h" />
     <ClInclude Include="Hub\HubIngressService.h" />
     <ClInclude Include="Hub\Protocol\HubMessage.h" />
