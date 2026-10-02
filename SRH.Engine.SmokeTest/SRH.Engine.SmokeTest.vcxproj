@@ -154,6 +154,7 @@
     <ClCompile Include="HubProtocolSmokeTest.cpp" />
     <ClCompile Include="HubSerialTransportSmokeTest.cpp" />
     <ClCompile Include="SRH.Engine.SmokeTest.cpp" />
+    <ClCompile Include="TelemetryDomainSmokeTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SRH.Engine\SRH.Engine.vcxproj">
@@ -167,6 +168,7 @@
     <ClInclude Include="HubMessageSmokeTest.h" />
     <ClInclude Include="HubProtocolSmokeTest.h" />
     <ClInclude Include="HubSerialTransportSmokeTest.h" />
+    <ClInclude Include="TelemetryDomainSmokeTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

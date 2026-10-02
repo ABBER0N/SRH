@@ -58,6 +58,12 @@
     <Filter Include="Hub\Transport">
       <UniqueIdentifier>{2d133d0b-87dc-4fbd-bb87-534c3c95aec3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{5fb796b4-8b91-4c39-bceb-1c3bb2089bf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Domain">
+      <UniqueIdentifier>{438e28ff-49b1-4a1a-b431-11bc04d14fdf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -164,6 +170,18 @@
     </ClInclude>
     <ClInclude Include="Hub\HubConnectionService.h">
       <Filter>Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryCommon.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryNativeChannel.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetrySnapshot.h">
+      <Filter>Game\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Domain\TelemetryState.h">
+      <Filter>Game\Domain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

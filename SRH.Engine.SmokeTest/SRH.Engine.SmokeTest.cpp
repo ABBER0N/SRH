@@ -1579,8 +1579,7 @@ int main()
     //
     // Low-level Windows USB CDC / COM transport.
     //
-    // Offline test only. No real COM device is
-    // opened.
+    // Offline test only.
     //
 
     if (
@@ -1598,11 +1597,9 @@ int main()
         << "PASS: Hub serial transport\n";
 
     //
-    // Connection/session worker.
+    // Hub connection/session lifecycle.
     //
-    // Offline test only. It verifies lifecycle,
-    // outgoing validation and failed connection
-    // handling without requiring ESP32-S3.
+    // Offline test only.
     //
 
     if (
@@ -1618,6 +1615,26 @@ int main()
 
     std::cout
         << "PASS: Hub connection service\n";
+
+    //
+    // Universal game telemetry domain.
+    //
+    // No simulator is required.
+    //
+
+    if (
+        !srh::smoketest::
+        RunTelemetryDomainSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Telemetry domain model\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Telemetry domain model\n";
 
     if (
         !TestDeviceRegistry(
