@@ -34,6 +34,9 @@
     <Filter Include="Исходные файлы\TelemetryDomainSmokeTest">
       <UniqueIdentifier>{ba30c199-635a-4130-89e7-ac4dfb239655}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\TelemetryServiceSmokeTest">
+      <UniqueIdentifier>{d3d84e16-754e-4d09-9442-de7d274f496f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRH.Engine.SmokeTest.cpp">
@@ -60,6 +63,9 @@
     <ClCompile Include="TelemetryDomainSmokeTest.cpp">
       <Filter>Исходные файлы\TelemetryDomainSmokeTest</Filter>
     </ClCompile>
+    <ClCompile Include="TelemetryServiceSmokeTest.cpp">
+      <Filter>Исходные файлы\TelemetryServiceSmokeTest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtf8.h">
@@ -82,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="TelemetryDomainSmokeTest.h">
       <Filter>Исходные файлы\TelemetryDomainSmokeTest</Filter>
+    </ClInclude>
+    <ClInclude Include="TelemetryServiceSmokeTest.h">
+      <Filter>Исходные файлы\TelemetryServiceSmokeTest</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

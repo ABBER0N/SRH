@@ -190,6 +190,7 @@
     <ClInclude Include="Game\Domain\TelemetrySnapshot.h" />
     <ClInclude Include="Game\Domain\TelemetryState.h" />
     <ClInclude Include="Game\Domain\TelemetryStaticState.h" />
+    <ClInclude Include="Game\Telemetry\TelemetryService.h" />
     <ClInclude Include="Hub\HubConnectionService.h" />
     <ClInclude Include="Hub\HubIngressService.h" />
     <ClInclude Include="Hub\Protocol\HubMessage.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="Execution\Windows\Media\MediaService.cpp" />
     <ClCompile Include="Execution\Windows\Text\Utf8.cpp" />
     <ClCompile Include="Execution\Windows\WindowsActionExecutor.cpp" />
+    <ClCompile Include="Game\Telemetry\TelemetryService.cpp" />
     <ClCompile Include="Hub\HubConnectionService.cpp" />
     <ClCompile Include="Hub\HubIngressService.cpp" />
     <ClCompile Include="Hub\Protocol\HubMessageCodec.cpp" />

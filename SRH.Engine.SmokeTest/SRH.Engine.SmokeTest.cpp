@@ -1619,8 +1619,6 @@ int main()
     //
     // Universal game telemetry domain.
     //
-    // No simulator is required.
-    //
 
     if (
         !srh::smoketest::
@@ -1635,6 +1633,26 @@ int main()
 
     std::cout
         << "PASS: Telemetry domain model\n";
+
+    //
+    // Thread-safe telemetry state owner.
+    //
+    // No simulator is required.
+    //
+
+    if (
+        !srh::smoketest::
+        RunTelemetryServiceSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Telemetry service\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Telemetry service\n";
 
     if (
         !TestDeviceRegistry(

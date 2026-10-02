@@ -5,6 +5,7 @@
 #include "HubMessageSmokeTest.h"
 #include "HubSerialTransportSmokeTest.h"
 #include "TelemetryDomainSmokeTest.h"
+#include "TelemetryServiceSmokeTest.h"
 
 namespace srh::smoketest
 {

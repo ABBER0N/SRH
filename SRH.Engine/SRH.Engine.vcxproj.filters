@@ -64,6 +64,9 @@
     <Filter Include="Game\Domain">
       <UniqueIdentifier>{438e28ff-49b1-4a1a-b431-11bc04d14fdf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Telemetry">
+      <UniqueIdentifier>{9bc56e31-8800-4d20-9d5b-c2c7b200981c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -198,6 +201,9 @@
     <ClInclude Include="Game\Domain\TelemetryStaticState.h">
       <Filter>Game\Domain</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Telemetry\TelemetryService.h">
+      <Filter>Game\Telemetry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -259,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="Hub\HubConnectionService.cpp">
       <Filter>Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Telemetry\TelemetryService.cpp">
+      <Filter>Game\Telemetry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
