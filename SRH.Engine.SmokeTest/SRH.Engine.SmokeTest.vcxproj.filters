@@ -21,9 +21,15 @@
     <ClCompile Include="ConsoleUtf8.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="HubProtocolSmokeTest.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtf8.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="HubProtocolSmokeTest.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>

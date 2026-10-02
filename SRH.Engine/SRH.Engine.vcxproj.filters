@@ -49,6 +49,12 @@
     <Filter Include="Devices\VirtualController">
       <UniqueIdentifier>{344d8833-994d-4a78-9ce5-f1306f149f9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hub">
+      <UniqueIdentifier>{f501a46c-5f35-4c7f-8d40-2038a1f01c22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hub\Protocol">
+      <UniqueIdentifier>{a4f92a19-a70d-4dbb-a3b0-85e8e692f8d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -132,6 +138,15 @@
     <ClInclude Include="Devices\VirtualController\VirtualControllerRegistry.h">
       <Filter>Devices\VirtualController</Filter>
     </ClInclude>
+    <ClInclude Include="Domain\HubProtocolTypes.h">
+      <Filter>Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="Hub\Protocol\HubPacket.h">
+      <Filter>Hub\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Hub\Protocol\HubProtocol.h">
+      <Filter>Hub\Protocol</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -178,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="Devices\VirtualController\VirtualControllerRegistry.cpp">
       <Filter>Devices\VirtualController</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub\Protocol\HubProtocol.cpp">
+      <Filter>Hub\Protocol</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -165,6 +165,7 @@
     <ClInclude Include="Domain\ActionTypes.h" />
     <ClInclude Include="Domain\DeviceState.h" />
     <ClInclude Include="Domain\ExecutionTypes.h" />
+    <ClInclude Include="Domain\HubProtocolTypes.h" />
     <ClInclude Include="Domain\InputEvent.h" />
     <ClInclude Include="Domain\InputTypes.h" />
     <ClInclude Include="Domain\MediaState.h" />
@@ -180,6 +181,8 @@
     <ClInclude Include="Execution\Windows\Text\Utf8.h" />
     <ClInclude Include="Execution\Windows\WindowsActionExecutor.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Hub\Protocol\HubPacket.h" />
+    <ClInclude Include="Hub\Protocol\HubProtocol.h" />
     <ClInclude Include="Input\InputEventBus.h" />
     <ClInclude Include="Input\InputStateStore.h" />
     <ClInclude Include="Mapping\MappingRule.h" />
@@ -198,6 +201,7 @@
     <ClCompile Include="Execution\Windows\Media\MediaService.cpp" />
     <ClCompile Include="Execution\Windows\Text\Utf8.cpp" />
     <ClCompile Include="Execution\Windows\WindowsActionExecutor.cpp" />
+    <ClCompile Include="Hub\Protocol\HubProtocol.cpp" />
     <ClCompile Include="Input\InputEventBus.cpp" />
     <ClCompile Include="Input\InputStateStore.cpp" />
     <ClCompile Include="Mapping\MappingService.cpp" />

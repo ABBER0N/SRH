@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleUtf8.cpp" />
+    <ClCompile Include="HubProtocolSmokeTest.cpp" />
     <ClCompile Include="SRH.Engine.SmokeTest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtf8.h" />
+    <ClInclude Include="HubProtocolSmokeTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
