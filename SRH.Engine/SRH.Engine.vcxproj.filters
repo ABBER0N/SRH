@@ -55,6 +55,9 @@
     <Filter Include="Hub\Protocol">
       <UniqueIdentifier>{a4f92a19-a70d-4dbb-a3b0-85e8e692f8d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hub\Transport">
+      <UniqueIdentifier>{2d133d0b-87dc-4fbd-bb87-534c3c95aec3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -156,6 +159,9 @@
     <ClInclude Include="Hub\HubIngressService.h">
       <Filter>Hub</Filter>
     </ClInclude>
+    <ClInclude Include="Hub\Transport\HubSerialTransport.h">
+      <Filter>Hub\Transport</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -211,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="Hub\HubIngressService.cpp">
       <Filter>Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub\Transport\HubSerialTransport.cpp">
+      <Filter>Hub\Transport</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

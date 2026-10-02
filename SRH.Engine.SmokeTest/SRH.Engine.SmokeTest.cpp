@@ -1576,6 +1576,27 @@ int main()
     std::cout
         << "PASS: Hub ingress pipeline\n";
 
+    //
+    // Windows USB CDC / COM transport API.
+    //
+    // This test is fully offline and does not
+    // require an ESP32-S3 or a real COM port.
+    //
+
+    if (
+        !srh::smoketest::
+        RunHubSerialTransportSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Hub serial transport\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Hub serial transport\n";
+
     if (
         !TestDeviceRegistry(
             engine

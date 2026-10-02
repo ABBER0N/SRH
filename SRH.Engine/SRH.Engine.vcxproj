@@ -186,6 +186,7 @@
     <ClInclude Include="Hub\Protocol\HubMessageCodec.h" />
     <ClInclude Include="Hub\Protocol\HubPacket.h" />
     <ClInclude Include="Hub\Protocol\HubProtocol.h" />
+    <ClInclude Include="Hub\Transport\HubSerialTransport.h" />
     <ClInclude Include="Input\InputEventBus.h" />
     <ClInclude Include="Input\InputStateStore.h" />
     <ClInclude Include="Mapping\MappingRule.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Hub\HubIngressService.cpp" />
     <ClCompile Include="Hub\Protocol\HubMessageCodec.cpp" />
     <ClCompile Include="Hub\Protocol\HubProtocol.cpp" />
+    <ClCompile Include="Hub\Transport\HubSerialTransport.cpp" />
     <ClCompile Include="Input\InputEventBus.cpp" />
     <ClCompile Include="Input\InputStateStore.cpp" />
     <ClCompile Include="Mapping\MappingService.cpp" />

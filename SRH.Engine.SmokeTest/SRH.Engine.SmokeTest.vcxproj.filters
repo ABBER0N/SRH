@@ -30,6 +30,9 @@
     <ClCompile Include="HubIngressSmokeTest.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="HubSerialTransportSmokeTest.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtf8.h">
@@ -42,6 +45,9 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="HubIngressSmokeTest.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="HubSerialTransportSmokeTest.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
