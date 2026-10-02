@@ -147,6 +147,12 @@
     <ClInclude Include="Hub\Protocol\HubProtocol.h">
       <Filter>Hub\Protocol</Filter>
     </ClInclude>
+    <ClInclude Include="Hub\Protocol\HubMessage.h">
+      <Filter>Hub\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Hub\Protocol\HubMessageCodec.h">
+      <Filter>Hub\Protocol</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -195,6 +201,9 @@
       <Filter>Devices\VirtualController</Filter>
     </ClCompile>
     <ClCompile Include="Hub\Protocol\HubProtocol.cpp">
+      <Filter>Hub\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub\Protocol\HubMessageCodec.cpp">
       <Filter>Hub\Protocol</Filter>
     </ClCompile>
   </ItemGroup>

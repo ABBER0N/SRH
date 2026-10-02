@@ -1540,6 +1540,24 @@ int main()
     std::cout
         << "PASS: Hub protocol framing\n";
 
+    //
+    // Hub message codec.
+    //
+
+    if (
+        !srh::smoketest::
+        RunHubMessageSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Hub message codec\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Hub message codec\n";
+
     if (
         !TestDeviceRegistry(
             engine

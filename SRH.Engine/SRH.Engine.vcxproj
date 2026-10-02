@@ -181,6 +181,8 @@
     <ClInclude Include="Execution\Windows\Text\Utf8.h" />
     <ClInclude Include="Execution\Windows\WindowsActionExecutor.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Hub\Protocol\HubMessage.h" />
+    <ClInclude Include="Hub\Protocol\HubMessageCodec.h" />
     <ClInclude Include="Hub\Protocol\HubPacket.h" />
     <ClInclude Include="Hub\Protocol\HubProtocol.h" />
     <ClInclude Include="Input\InputEventBus.h" />
@@ -201,6 +203,7 @@
     <ClCompile Include="Execution\Windows\Media\MediaService.cpp" />
     <ClCompile Include="Execution\Windows\Text\Utf8.cpp" />
     <ClCompile Include="Execution\Windows\WindowsActionExecutor.cpp" />
+    <ClCompile Include="Hub\Protocol\HubMessageCodec.cpp" />
     <ClCompile Include="Hub\Protocol\HubProtocol.cpp" />
     <ClCompile Include="Input\InputEventBus.cpp" />
     <ClCompile Include="Input\InputStateStore.cpp" />
