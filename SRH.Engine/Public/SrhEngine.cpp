@@ -3,6 +3,7 @@
 #include "Public/SrhEngine.h"
 
 #include "Devices/DeviceRegistry.h"
+#include "Devices/VirtualController/VirtualControllerRegistry.h"
 #include "Execution/ActionExecutor.h"
 #include "Execution/VirtualController/VirtualControllerService.h"
 #include "Execution/Windows/Media/MediaService.h"
@@ -11,6 +12,7 @@
 #include "Input/InputStateStore.h"
 #include "Mapping/MappingService.h"
 
+#include <mutex>
 #include <utility>
 
 namespace srh::engine
@@ -20,15 +22,80 @@ namespace srh::engine
     public:
         Impl()
         {
+            //
+            // Default controller keeps the current
+            // SRH behaviour compatible with the
+            // existing DeviceId = 0 mappings.
+            //
+
+            VirtualControllerState
+                defaultController;
+
+            defaultController.deviceId =
+                0;
+
+            defaultController.name =
+                "Virtual Controller 1";
+
+            defaultController.enabled =
+                true;
+
+            defaultController.active =
+                false;
+
+            virtualControllerRegistry
+                .AddOrUpdate(
+                    std::move(
+                        defaultController
+                    )
+                );
+
             actionExecutor.SetVirtualControllerHandler(
                 [this](
                     const VirtualControllerAction& action
                     )
                 {
-                    return
-                        virtualControllerService.Execute(
+                    std::scoped_lock lock(
+                        virtualControllerMutex
+                    );
+
+                    const auto controller =
+                        virtualControllerRegistry
+                        .Find(
+                            action.deviceId
+                        );
+
+                    if (
+                        !controller.has_value() ||
+                        !controller->enabled
+                        )
+                    {
+                        return
+                            ActionExecutionStatus::
+                            Failed;
+                    }
+
+                    const auto status =
+                        virtualControllerService
+                        .Execute(
                             action
                         );
+
+                    if (
+                        status ==
+                        ActionExecutionStatus::
+                        Executed
+                        )
+                    {
+                        (void)
+                            virtualControllerRegistry
+                            .SetActive(
+                                action.deviceId,
+                                true
+                            );
+                    }
+
+                    return status;
                 }
             );
 
@@ -56,6 +123,12 @@ namespace srh::engine
 
         MappingService
             mappingService;
+
+        mutable std::mutex
+            virtualControllerMutex;
+
+        VirtualControllerRegistry
+            virtualControllerRegistry;
 
         virtual_controller::
             VirtualControllerService
@@ -337,13 +410,297 @@ namespace srh::engine
     }
 
     //
-    // Virtual controller
+    // Virtual controller configuration
+    //
+
+    void SrhEngine::SetVirtualControllers(
+        std::vector<VirtualControllerState>
+        controllers
+    )
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        (void)
+            m_impl->
+            virtualControllerService
+            .ResetAll();
+
+        for (
+            auto& controller :
+            controllers
+            )
+        {
+            controller.active =
+                false;
+        }
+
+        m_impl->
+            virtualControllerRegistry
+            .SetControllers(
+                std::move(
+                    controllers
+                )
+            );
+    }
+
+    void SrhEngine::
+        AddOrUpdateVirtualController(
+            VirtualControllerState controller
+        )
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        const auto existing =
+            m_impl->
+            virtualControllerRegistry
+            .Find(
+                controller.deviceId
+            );
+
+        if (existing.has_value())
+        {
+            if (!controller.enabled)
+            {
+                //
+                // Publish the disabled configuration
+                // first. No concurrent input action
+                // can revive it while it is reset.
+                //
+
+                controller.active =
+                    false;
+
+                m_impl->
+                    virtualControllerRegistry
+                    .AddOrUpdate(
+                        controller
+                    );
+
+                (void)
+                    m_impl->
+                    virtualControllerService
+                    .ResetDevice(
+                        controller.deviceId
+                    );
+
+                return;
+            }
+
+            //
+            // Name/configuration changes do not make
+            // an already active controller inactive.
+            //
+
+            controller.active =
+                existing->active;
+        }
+        else
+        {
+            controller.active =
+                false;
+        }
+
+        m_impl->
+            virtualControllerRegistry
+            .AddOrUpdate(
+                std::move(
+                    controller
+                )
+            );
+    }
+
+    bool SrhEngine::
+        RemoveVirtualController(
+            const VirtualDeviceId deviceId
+        )
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        const bool removed =
+            m_impl->
+            virtualControllerRegistry
+            .Remove(
+                deviceId
+            );
+
+        if (!removed)
+        {
+            return false;
+        }
+
+        (void)
+            m_impl->
+            virtualControllerService
+            .ResetDevice(
+                deviceId
+            );
+
+        return true;
+    }
+
+    void SrhEngine::
+        ClearVirtualControllers()
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        (void)
+            m_impl->
+            virtualControllerService
+            .ResetAll();
+
+        m_impl->
+            virtualControllerRegistry
+            .Clear();
+    }
+
+    std::optional<VirtualControllerState>
+        SrhEngine::FindVirtualController(
+            const VirtualDeviceId deviceId
+        ) const
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        return
+            m_impl->
+            virtualControllerRegistry
+            .Find(
+                deviceId
+            );
+    }
+
+    std::vector<VirtualControllerState>
+        SrhEngine::GetVirtualControllers()
+        const
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        return
+            m_impl->
+            virtualControllerRegistry
+            .GetControllers();
+    }
+
+    VirtualControllerSnapshot
+        SrhEngine::
+        GetVirtualControllerSnapshot()
+        const
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        return
+            m_impl->
+            virtualControllerRegistry
+            .GetSnapshot();
+    }
+
+    bool SrhEngine::
+        SetVirtualControllerEnabled(
+            const VirtualDeviceId deviceId,
+            const bool enabled
+        )
+    {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        const auto controller =
+            m_impl->
+            virtualControllerRegistry
+            .Find(
+                deviceId
+            );
+
+        if (!controller.has_value())
+        {
+            return false;
+        }
+
+        if (
+            controller->enabled ==
+            enabled
+            )
+        {
+            return true;
+        }
+
+        if (!enabled)
+        {
+            //
+            // Disable first so no new action can
+            // reach the driver during neutralization.
+            //
+
+            (void)
+                m_impl->
+                virtualControllerRegistry
+                .SetEnabled(
+                    deviceId,
+                    false
+                );
+
+            (void)
+                m_impl->
+                virtualControllerRegistry
+                .SetActive(
+                    deviceId,
+                    false
+                );
+
+            (void)
+                m_impl->
+                virtualControllerService
+                .ResetDevice(
+                    deviceId
+                );
+
+            return true;
+        }
+
+        (void)
+            m_impl->
+            virtualControllerRegistry
+            .SetEnabled(
+                deviceId,
+                true
+            );
+
+        (void)
+            m_impl->
+            virtualControllerRegistry
+            .SetActive(
+                deviceId,
+                false
+            );
+
+        return true;
+    }
+
+    //
+    // Virtual controller driver
     //
 
     bool SrhEngine::
         ConnectVirtualControllerDriver()
         noexcept
     {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
         return
             m_impl->
             virtualControllerService
@@ -354,15 +711,29 @@ namespace srh::engine
         DisconnectVirtualControllerDriver()
         noexcept
     {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
         m_impl->
             virtualControllerService
             .Disconnect();
+
+        m_impl->
+            virtualControllerRegistry
+            .SetAllActive(
+                false
+            );
     }
 
     bool SrhEngine::
         IsVirtualControllerDriverConnected()
         const noexcept
     {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
         return
             m_impl->
             virtualControllerService
@@ -374,6 +745,10 @@ namespace srh::engine
         GetVirtualControllerDriverError()
         const noexcept
     {
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
         return
             m_impl->
             virtualControllerService
@@ -384,10 +759,22 @@ namespace srh::engine
         ResetVirtualControllers()
         noexcept
     {
-        return
+        std::scoped_lock lock(
+            m_impl->virtualControllerMutex
+        );
+
+        const bool success =
             m_impl->
             virtualControllerService
             .ResetAll();
+
+        m_impl->
+            virtualControllerRegistry
+            .SetAllActive(
+                false
+            );
+
+        return success;
     }
 
     //

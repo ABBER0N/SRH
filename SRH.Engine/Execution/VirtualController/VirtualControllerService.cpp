@@ -22,10 +22,21 @@ namespace srh::engine::virtual_controller
             m_mutex
         );
 
-        auto& report =
-            m_reports[
+        InputReportV1 report;
+
+        const auto existing =
+            m_reports.find(
                 action.deviceId
-            ];
+            );
+
+        if (
+            existing !=
+            m_reports.end()
+            )
+        {
+            report =
+                existing->second;
+        }
 
         if (
             !ApplyAction(
@@ -39,35 +50,46 @@ namespace srh::engine::virtual_controller
                 Failed;
         }
 
-        if (!EnsureConnected())
-        {
+        //
+        // Keep the desired complete state even if
+        // the driver is temporarily unavailable.
+        //
+
+        m_reports[
+            action.deviceId
+        ] =
+            report;
+
+            if (!EnsureConnected())
+            {
+                return
+                    ActionExecutionStatus::
+                    Failed;
+            }
+
+            if (
+                !m_client.SubmitReport(
+                    action.deviceId,
+                    report
+                )
+                )
+            {
+                //
+                // Do not retain a potentially dead
+                // device handle. The next action will
+                // attempt discovery again.
+                //
+
+                m_client.Close();
+
+                return
+                    ActionExecutionStatus::
+                    Failed;
+            }
+
             return
                 ActionExecutionStatus::
-                Failed;
-        }
-
-        if (
-            !m_client.SubmitReport(
-                action.deviceId,
-                report
-            )
-            )
-        {
-            //
-            // Do not retain a potentially dead handle.
-            // The next action will attempt to reconnect.
-            //
-
-            m_client.Close();
-
-            return
-                ActionExecutionStatus::
-                Failed;
-        }
-
-        return
-            ActionExecutionStatus::
-            Executed;
+                Executed;
     }
 
     bool VirtualControllerService::
@@ -92,12 +114,6 @@ namespace srh::engine::virtual_controller
 
         if (m_client.IsOpen())
         {
-            //
-            // Release every virtual button and
-            // center all axes/POVs before closing
-            // the user-mode connection.
-            //
-
             (void)NeutralizeAllLocked();
         }
 
@@ -132,6 +148,67 @@ namespace srh::engine::virtual_controller
     }
 
     bool VirtualControllerService::
+        ResetDevice(
+            const VirtualDeviceId deviceId
+        ) noexcept
+    {
+        std::scoped_lock lock(
+            m_mutex
+        );
+
+        const auto iterator =
+            m_reports.find(
+                deviceId
+            );
+
+        if (
+            iterator ==
+            m_reports.end()
+            )
+        {
+            return true;
+        }
+
+        bool success =
+            true;
+
+        if (!EnsureConnected())
+        {
+            success =
+                false;
+        }
+        else
+        {
+            InputReportV1
+                neutralReport;
+
+            if (
+                !m_client.SubmitReport(
+                    deviceId,
+                    neutralReport
+                )
+                )
+            {
+                success =
+                    false;
+
+                m_client.Close();
+            }
+        }
+
+        //
+        // Never restore the old active state after
+        // disabling/removing this controller.
+        //
+
+        m_reports.erase(
+            iterator
+        );
+
+        return success;
+    }
+
+    bool VirtualControllerService::
         ResetAll()
         noexcept
     {
@@ -144,20 +221,8 @@ namespace srh::engine::virtual_controller
             return true;
         }
 
-        //
-        // If the connection disappeared after a
-        // previous successful submission, try to
-        // reconnect so we can send neutral reports.
-        //
-
         if (!EnsureConnected())
         {
-            //
-            // Locally forget all old active states.
-            // A future action will therefore send a
-            // fresh report instead of restoring them.
-            //
-
             m_reports.clear();
 
             return false;
@@ -167,6 +232,11 @@ namespace srh::engine::virtual_controller
             NeutralizeAllLocked();
 
         m_reports.clear();
+
+        if (!success)
+        {
+            m_client.Close();
+        }
 
         return success;
     }
@@ -241,12 +311,6 @@ namespace srh::engine::virtual_controller
         {
         case VirtualControllerActionKind::Button:
         {
-            //
-            // SRH public numbering:
-            //
-            // Button 1 ... 128
-            //
-
             if (
                 action.controlId < 1 ||
                 action.controlId >
@@ -298,10 +362,6 @@ namespace srh::engine::virtual_controller
 
         case VirtualControllerActionKind::Axis:
         {
-            //
-            // Axis 1 ... 8
-            //
-
             if (
                 action.controlId < 1 ||
                 action.controlId >
@@ -328,22 +388,6 @@ namespace srh::engine::virtual_controller
 
         case VirtualControllerActionKind::Pov:
         {
-            //
-            // POV 1 ... 4
-            //
-            // SRH canonical value:
-            //
-            // -1     = centered
-            // 0      = north
-            // 4500   = north-east
-            // 9000   = east
-            // 13500  = south-east
-            // 18000  = south
-            // 22500  = south-west
-            // 27000  = west
-            // 31500  = north-west
-            //
-
             if (
                 action.controlId < 1 ||
                 action.controlId >

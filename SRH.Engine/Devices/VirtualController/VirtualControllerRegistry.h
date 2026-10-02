@@ -54,6 +54,10 @@ namespace srh::engine
             bool active
         );
 
+        void SetAllActive(
+            bool active
+        );
+
     private:
         mutable std::shared_mutex
             m_mutex;

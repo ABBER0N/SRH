@@ -6,6 +6,7 @@
 #include "Domain/InputEvent.h"
 #include "Domain/InputTypes.h"
 #include "Domain/MediaState.h"
+#include "Domain/VirtualControllerState.h"
 #include "Mapping/MappingRule.h"
 
 #include <cstdint>
@@ -144,7 +145,47 @@ namespace srh::engine
             ) const;
 
         //
-        // Virtual controller
+        // Virtual controller configuration
+        //
+
+        void SetVirtualControllers(
+            std::vector<VirtualControllerState>
+            controllers
+        );
+
+        void AddOrUpdateVirtualController(
+            VirtualControllerState controller
+        );
+
+        [[nodiscard]]
+        bool RemoveVirtualController(
+            VirtualDeviceId deviceId
+        );
+
+        void ClearVirtualControllers();
+
+        [[nodiscard]]
+        std::optional<VirtualControllerState>
+            FindVirtualController(
+                VirtualDeviceId deviceId
+            ) const;
+
+        [[nodiscard]]
+        std::vector<VirtualControllerState>
+            GetVirtualControllers() const;
+
+        [[nodiscard]]
+        VirtualControllerSnapshot
+            GetVirtualControllerSnapshot() const;
+
+        [[nodiscard]]
+        bool SetVirtualControllerEnabled(
+            VirtualDeviceId deviceId,
+            bool enabled
+        );
+
+        //
+        // Virtual controller driver
         //
 
         [[nodiscard]]

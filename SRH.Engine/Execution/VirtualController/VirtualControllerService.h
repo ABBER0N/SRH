@@ -47,6 +47,11 @@ namespace srh::engine::virtual_controller
             noexcept;
 
         [[nodiscard]]
+        bool ResetDevice(
+            VirtualDeviceId deviceId
+        ) noexcept;
+
+        [[nodiscard]]
         bool ResetAll()
             noexcept;
 
@@ -82,7 +87,7 @@ namespace srh::engine::virtual_controller
             m_client;
 
         std::unordered_map<
-            std::uint16_t,
+            VirtualDeviceId,
             InputReportV1
         > m_reports;
     };

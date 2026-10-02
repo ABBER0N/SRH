@@ -219,4 +219,28 @@ namespace srh::engine
 
         return true;
     }
+
+    void VirtualControllerRegistry::
+        SetAllActive(
+            const bool active
+        )
+    {
+        std::unique_lock lock(
+            m_mutex
+        );
+
+        for (
+            auto& [
+                deviceId,
+                controller
+            ] :
+            m_controllers
+            )
+        {
+            (void)deviceId;
+
+            controller.active =
+                active;
+        }
+    }
 }
