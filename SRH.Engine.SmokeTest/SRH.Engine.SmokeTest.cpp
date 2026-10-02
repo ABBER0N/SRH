@@ -1558,6 +1558,24 @@ int main()
     std::cout
         << "PASS: Hub message codec\n";
 
+    //
+    // Hub ingress -> SrhEngine.
+    //
+
+    if (
+        !srh::smoketest::
+        RunHubIngressSmokeTest()
+        )
+    {
+        std::cout
+            << "FAIL: Hub ingress pipeline\n";
+
+        return 1;
+    }
+
+    std::cout
+        << "PASS: Hub ingress pipeline\n";
+
     if (
         !TestDeviceRegistry(
             engine

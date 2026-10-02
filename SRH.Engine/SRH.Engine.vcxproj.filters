@@ -153,6 +153,9 @@
     <ClInclude Include="Hub\Protocol\HubMessageCodec.h">
       <Filter>Hub\Protocol</Filter>
     </ClInclude>
+    <ClInclude Include="Hub\HubIngressService.h">
+      <Filter>Hub</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -205,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="Hub\Protocol\HubMessageCodec.cpp">
       <Filter>Hub\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub\HubIngressService.cpp">
+      <Filter>Hub</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
